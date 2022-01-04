@@ -48,10 +48,10 @@ pub enum PlatformError {
     MysqlError(#[from] MysqlError),
 }
 
-impl Into<DataOpError> for PlatformError {
+impl From<PlatformError> for DataOpError {
     /// attempt to convert platform specific error to DataOpeation error
-    fn into(self) -> DataOpError {
-        match self {
+    fn from(platform_error: PlatformError) -> Self {
+        match platform_error {
             #[cfg(feature = "with-postgres")]
             PlatformError::PostgresError(postgres_err) => match postgres_err {
                 PostgresError::SqlError(ref pg_err, ref sql) => {
