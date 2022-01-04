@@ -525,8 +525,8 @@ mod test {
         let db_url = "postgres://postgres:p0stgr3s@localhost:5432/sakila";
         let mut pool = Pool::new();
         let mut dm = pool.dm(db_url).unwrap();
-        let sql = format!("SELECT language_id, name FROM language",);
-        let languages: Result<Rows, DbError> = dm.execute_sql_with_return(&sql, &[]);
+        let sql = "SELECT language_id, name FROM language";
+        let languages: Result<Rows, DbError> = dm.execute_sql_with_return(sql, &[]);
         println!("languages: {:#?}", languages);
         assert!(languages.is_ok());
     }
@@ -553,8 +553,8 @@ mod test {
         let db_url = "postgres://postgres:p0stgr3s@localhost:5432/sakila";
         let mut pool = Pool::new();
         let mut dm = pool.dm(db_url).unwrap();
-        let sql = format!("SELECT film_id, title, fulltext::text FROM film LIMIT 40",);
-        let films: Result<Rows, DbError> = dm.execute_sql_with_return(&sql, &[]);
+        let sql = "SELECT film_id, title, fulltext::text FROM film LIMIT 40";
+        let films: Result<Rows, DbError> = dm.execute_sql_with_return(sql, &[]);
         println!("film: {:#?}", films);
         assert!(films.is_ok());
     }
