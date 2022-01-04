@@ -1,6 +1,7 @@
 use rustorm::{DbError, FromDao, Pool, ToColumnNames, ToTableName};
 
 #[derive(Debug, FromDao, ToColumnNames, ToTableName)]
+#[allow(dead_code)]
 struct Actor {
     actor_id: i32,
     first_name: String,
