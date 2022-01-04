@@ -15,7 +15,6 @@ pub fn get_columns(
     /// column name and comment
     #[derive(Debug, crate::codegen::FromDao)]
     struct ColumnSimple {
-        number: i32,
         name: String,
         comment: Option<String>,
     }
@@ -72,7 +71,6 @@ pub fn get_columns(
         .map(|rows| {
             rows.iter()
                 .map(|row| ColumnSimple {
-                    number: row.get("number").expect("a number"),
                     name: row.get("name").expect("a name"),
                     comment: row.get_opt("comment").expect("a comment"),
                 })
