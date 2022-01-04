@@ -75,18 +75,14 @@ impl Into<DataOpError> for PlatformError {
                             code: code.code().to_string(),
                             message: message.clone(),
                             detail: detail.clone(),
-                            cause_table: if let Some(table) = table {
-                                Some(
-                                    TableName {
-                                        name: table.to_string(),
-                                        schema: schema.clone(),
-                                        alias: None,
-                                    }
-                                    .complete_name(),
-                                )
-                            } else {
-                                None
-                            },
+                            cause_table: table.as_ref().map(|table| {
+                                TableName {
+                                    name: table.to_string(),
+                                    schema: schema.clone(),
+                                    alias: None,
+                                }
+                                .complete_name()
+                            }),
                             constraint: constraint.clone(),
                             column: column.clone(),
                             datatype: datatype.clone(),
