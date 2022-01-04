@@ -629,6 +629,7 @@ mod test {
     }
 
     #[test]
+    #[allow(clippy::bool_assert_comparison)]
     fn using_values() {
         let mut pool = Pool::new();
         let db_url = "postgres://postgres:p0stgr3s@localhost/sakila";
