@@ -543,7 +543,7 @@ mod test {
             .unwrap();
         let result = em
             .set_autoincrement_value(&actor_table, last_value + 1)
-            .unwrap_or_else(|e| panic!(e));
+            .unwrap_or_else(|e| panic!("{}", e));
         println!("result: {:?}", result);
         assert_eq!(result, Some(last_value + 1));
     }
