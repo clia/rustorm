@@ -13,8 +13,6 @@ use crate::{
 
 use log::*;
 use r2d2::{self, ManageConnection};
-use r2d2_sqlite;
-use rusqlite;
 use thiserror::Error;
 use uuid::Uuid;
 

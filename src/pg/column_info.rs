@@ -5,7 +5,6 @@ use crate::{
     util, ColumnDef, ColumnName, Database, DbError, TableName, ToValue,
 };
 use log::*;
-use rustorm_dao;
 use uuid::Uuid;
 
 /// get all the columns of the table

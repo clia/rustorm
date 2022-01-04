@@ -14,7 +14,6 @@ use postgres_shared::types::{Kind, Kind::Enum};
 use r2d2::{self, ManageConnection};
 use r2d2_postgres::{self, TlsMode};
 use rustorm_dao::{value::Array, Interval, Rows};
-use serde_json;
 use std::{error::Error, fmt, string::FromUtf8Error};
 use thiserror::Error;
 
