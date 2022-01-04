@@ -118,10 +118,7 @@ impl ToSql for PgNumeric {
     }
 
     fn accepts(ty: &Type) -> bool {
-        match *ty {
-            types::NUMERIC => true,
-            _ => false,
-        }
+        matches!(*ty, types::NUMERIC)
     }
 }
 

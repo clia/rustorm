@@ -48,30 +48,21 @@ pub enum SqlType {
 
 impl SqlType {
     pub fn is_array_type(&self) -> bool {
-        match *self {
-            SqlType::Array(_) => true,
-            _ => false,
-        }
+        matches!(*self, SqlType::Array(_))
     }
 
     pub fn is_integer_type(&self) -> bool {
-        match *self {
-            SqlType::Int => true,
-            SqlType::Tinyint => true,
-            SqlType::Smallint => true,
-            SqlType::Bigint => true,
-            _ => false,
-        }
+        matches!(
+            *self,
+            SqlType::Int | SqlType::Tinyint | SqlType::Smallint | SqlType::Bigint
+        )
     }
 
     pub fn is_decimal_type(&self) -> bool {
-        match *self {
-            SqlType::Real => true,
-            SqlType::Float => true,
-            SqlType::Double => true,
-            SqlType::Numeric => true,
-            _ => false,
-        }
+        matches!(
+            *self,
+            SqlType::Real | SqlType::Float | SqlType::Double | SqlType::Numeric
+        )
     }
 
     pub fn cast_as(&self) -> Option<SqlType> {

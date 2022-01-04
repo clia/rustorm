@@ -70,9 +70,6 @@ impl FromSql for PgInterval {
     }
 
     fn accepts(ty: &Type) -> bool {
-        match *ty {
-            types::INTERVAL => true,
-            _ => false,
-        }
+        matches!(*ty, types::INTERVAL)
     }
 }

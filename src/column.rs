@@ -29,20 +29,17 @@ impl ColumnDef {
 
     /// check if any of the column constraint default is generated from uuid
     pub fn default_is_generated_uuid(&self) -> bool {
-        self.specification.constraints.iter().any(|c| match *c {
-            ColumnConstraint::DefaultValue(ref literal) => match *literal {
-                Literal::UuidGenerateV4 => true,
-                _ => false,
-            },
-            _ => false,
-        })
+        self.specification
+            .constraints
+            .iter()
+            .any(|c| matches!(*c, ColumnConstraint::DefaultValue(Literal::UuidGenerateV4)))
     }
 
     pub fn is_not_null(&self) -> bool {
-        self.specification.constraints.iter().any(|c| match *c {
-            ColumnConstraint::NotNull => true,
-            _ => false,
-        })
+        self.specification
+            .constraints
+            .iter()
+            .any(|c| matches!(*c, ColumnConstraint::NotNull))
     }
 
     pub fn get_sql_type(&self) -> SqlType {
