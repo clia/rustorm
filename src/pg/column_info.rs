@@ -568,6 +568,16 @@ mod test {
         let result: Result<Vec<RetrieveFilm>, DbError> = em.insert(&[&film1]);
         info!("result: {:#?}", result);
         assert!(result.is_ok());
+
+        let inserted_films = result.unwrap();
+        assert_eq!(inserted_films.len(), 1);
+
+        let inserted_film = inserted_films.into_iter().next().unwrap();
+        assert!(inserted_film.film_id >= 0);
+        assert_eq!(inserted_film.title, film1.title);
+        assert_eq!(inserted_film.language_id, film1.language_id);
+        assert_eq!(inserted_film.special_features, film1.special_features);
+        assert!(Utc::now() - inserted_film.last_update < Duration::seconds(10));
     }
 
     #[test]
