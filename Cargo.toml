@@ -10,46 +10,52 @@ readme = "README.md"
 keywords = ["orm", "postgresql", "sqlite"]
 edition = "2018"
 
-
 [package.metadata.docs.rs]
 features = ["with-postgres"]
 
 [dependencies]
-log = "0.4"
-postgres = {version = "0.15.1",features = ["with-uuid","with-chrono","with-time","with-geo","with-bit-vec", "with-serde_json"], optional = true}
-r2d2_postgres = {version = "0.14.0", optional = true}
-postgres-shared = {version = "0.4.0", optional = true}
-r2d2 = "0.8"
-url = "1.5"
-cfg-if = "0.1.2"
-uuid = "0.5.1"
-chrono = "0.4.0"
-rusqlite = {version = "0.21", optional = true}
-r2d2_sqlite = {version = "0.14", optional = true}
-serde = { version = "1.0.15", features = ["derive"] }
-serde_json = "1.0.3"
-byteorder = "1.0"
 bigdecimal = "0.0.14"
-num-bigint = "0.2"
-num-traits = "0.2"
-num-integer = "0.1"
-meval = "0.1.0"
+byteorder = "1.0"
+cfg-if = "0.1.2"
+chrono = "0.4.0"
 geo = "0.4"
-time = "0.1.14"
+log = "0.4"
+meval = "0.1.0"
+num-bigint = "0.2"
+num-integer = "0.1"
+num-traits = "0.2"
+postgres-shared = { version = "0.4.0", optional = true }
+r2d2 = "0.8"
+r2d2_mysql = { version = "16.0.0", optional = true }
+r2d2_postgres = { version = "0.14.0", optional = true }
+r2d2_sqlite = { version = "0.14", optional = true }
+rusqlite = { version = "0.21", optional = true }
 rustorm_dao = { path = "crates/dao", version = "0.18.0" }
 rustorm_codegen = { path = "crates/codegen", version = "0.18.0" }
-r2d2_mysql = {version = "16.0.0", optional = true}
+serde = { version = "1.0.15", features = ["derive"] }
+serde_json = "1.0.3"
 thiserror = "1.0.3"
+time = "0.1.14"
+url = "1.5"
+uuid = "0.5.1"
 
-
+[dependencies.postgres]
+version = "0.15.1"
+optional = true
+features = [
+    "with-bit-vec",
+    "with-chrono",
+    "with-geo",
+    "with-serde_json",
+    "with-time",
+    "with-uuid",
+]
 
 [badges]
 travis-ci = { repository = "ivanceras/rustorm" }
 
 [features]
-#default = ["with-postgres"]
-with-postgres = ["postgres", "r2d2_postgres", "postgres-shared"]
-with-sqlite = ["rusqlite","r2d2_sqlite"]
-with-mysql = ["r2d2_mysql"]
 db-auth = [] # Use the database as authentication server for the user
-
+with-mysql = ["r2d2_mysql"]
+with-postgres = ["postgres", "r2d2_postgres", "postgres-shared"]
+with-sqlite = ["rusqlite", "r2d2_sqlite"]
