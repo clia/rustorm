@@ -105,12 +105,7 @@ impl Database for MysqlDB {
             is_view: i32,
         }
 
-        let schema = table_name
-            .schema
-            .as_ref()
-            .map(String::as_str)
-            .unwrap_or("__DUMMY__")
-            .into();
+        let schema = table_name.schema.as_deref().unwrap_or("__DUMMY__").into();
         let table_name = &table_name.name.clone().into();
 
         let mut tables: Vec<TableSpec> = self
