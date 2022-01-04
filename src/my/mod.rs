@@ -5,7 +5,10 @@ use crate::{
     Database, DatabaseName, DbError, FromDao, TableDef, TableName, ToValue, Value,
 };
 use r2d2::ManageConnection;
-use r2d2_mysql::{self, mysql};
+use r2d2_mysql::{
+    self,
+    mysql::{self, prelude::Queryable},
+};
 use rustorm_dao::{FromDao, Rows};
 use thiserror::Error;
 
@@ -48,21 +51,17 @@ impl Database for MysqlDB {
     }
 
     fn execute_sql_with_return(&mut self, sql: &str, param: &[&Value]) -> Result<Rows, DbError> {
-        fn collect(mut rows: mysql::QueryResult) -> Result<Rows, DbError> {
-            let column_types: Vec<_> = rows.columns_ref().iter().map(|c| c.column_type()).collect();
-
-            let column_names = rows
-                .columns_ref()
-                .iter()
+        fn collect(rows: Vec<mysql::Row>) -> Result<Rows, DbError> {
+            let columns = rows.first().into_iter().flat_map(mysql::Row::columns_ref);
+            let column_types: Vec<_> = columns.clone().map(|c| c.column_type()).collect();
+            let column_names = columns
                 .map(|c| std::str::from_utf8(c.name_ref()).map(ToString::to_string))
                 .collect::<Result<Vec<String>, _>>()
                 .map_err(|e| MysqlError::Utf8Error(e))?;
 
             let mut records = Rows::new(column_names);
-            while rows.more_results_exists() {
-                for r in rows.by_ref() {
-                    records.push(into_record(r.map_err(MysqlError::from)?, &column_types)?);
-                }
+            for row in rows {
+                records.push(into_record(row, &column_types)?);
             }
 
             Ok(records)
@@ -76,9 +75,9 @@ impl Database for MysqlDB {
 
             collect(rows)
         } else {
-            let mut stmt = self
+            let stmt = self
                 .0
-                .prepare(&sql)
+                .prep(&sql)
                 .map_err(|e| MysqlError::SqlError(e, sql.to_string()))?;
 
             let params: mysql::Params = param
@@ -88,8 +87,9 @@ impl Database for MysqlDB {
                 .collect::<Vec<_>>()
                 .into();
 
-            let rows = stmt
-                .execute(&params)
+            let rows = self
+                .0
+                .exec(stmt, &params)
                 .map_err(|e| MysqlError::SqlError(e, sql.to_string()))?;
 
             collect(rows)
@@ -471,7 +471,9 @@ fn into_record(
                 ColumnType::MYSQL_TYPE_BIT
                 | ColumnType::MYSQL_TYPE_ENUM
                 | ColumnType::MYSQL_TYPE_SET
-                | ColumnType::MYSQL_TYPE_GEOMETRY => {
+                | ColumnType::MYSQL_TYPE_GEOMETRY
+                | ColumnType::MYSQL_TYPE_TYPED_ARRAY
+                | ColumnType::MYSQL_TYPE_UNKNOWN => {
                     panic!("not yet handling this kind: {:?}", column_type)
                 }
             }
