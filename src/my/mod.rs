@@ -16,7 +16,7 @@ pub fn init_pool(
     db_url: &str,
 ) -> Result<r2d2::Pool<r2d2_mysql::MysqlConnectionManager>, MysqlError> {
     test_connection(db_url)?;
-    let opts = mysql::Opts::from_url(&db_url)?;
+    let opts = mysql::Opts::from_url(db_url)?;
     let builder = mysql::OptsBuilder::from_opts(opts);
     let manager = r2d2_mysql::MysqlConnectionManager::new(builder);
     let pool = r2d2::Pool::new(manager)?;
@@ -24,7 +24,7 @@ pub fn init_pool(
 }
 
 pub fn test_connection(db_url: &str) -> Result<(), MysqlError> {
-    let opts = mysql::Opts::from_url(&db_url)?;
+    let opts = mysql::Opts::from_url(db_url)?;
     let builder = mysql::OptsBuilder::from_opts(opts);
     let manager = r2d2_mysql::MysqlConnectionManager::new(builder);
     let mut conn = manager.connect()?;
@@ -124,7 +124,7 @@ impl Database for MysqlDB {
                  WHERE TABLE_SCHEMA = CASE ? WHEN '__DUMMY__' THEN DATABASE() ELSE ? END AND TABLE_NAME = ?"#,
                 &[
                     &schema, &schema,
-                    &table_name,
+                    table_name,
                 ],
             )?
             .iter()
@@ -155,7 +155,7 @@ impl Database for MysqlDB {
                        CAST(COLUMN_TYPE as CHAR(255)) AS type_
                   FROM INFORMATION_SCHEMA.COLUMNS
                  WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?"#,
-                &[&table_spec.schema.clone().into(), &table_name],
+                &[&table_spec.schema.clone().into(), table_name],
             )?
             .iter()
             .map(|dao| FromDao::from_dao(&dao))
@@ -287,7 +287,7 @@ impl Database for MysqlDB {
     fn get_database_name(&mut self) -> Result<Option<DatabaseName>, DbError> {
         let sql = "SELECT database() AS name";
         let mut database_names: Vec<Option<DatabaseName>> =
-            self.execute_sql_with_return(&sql, &[]).map(|rows| {
+            self.execute_sql_with_return(sql, &[]).map(|rows| {
                 rows.iter()
                     .map(|row| {
                         row.get_opt("name")
@@ -310,7 +310,7 @@ impl Database for MysqlDB {
     #[cfg(feature = "db-auth")]
     fn get_users(&mut self) -> Result<Vec<User>, DbError> {
         let sql = "SELECT USER as usernameFROM information_schema.user_attributes";
-        let rows: Result<Rows, DbError> = self.execute_sql_with_return(&sql, &[]);
+        let rows: Result<Rows, DbError> = self.execute_sql_with_return(sql, &[]);
 
         rows.map(|rows| {
             rows.iter()

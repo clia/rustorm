@@ -112,11 +112,11 @@ pub fn cast_type(value: &Value, required_type: &SqlType) -> Value {
             Value::Text(ref v) => {
                 match *required_type {
                     SqlType::Timestamp => {
-                        let ts = NaiveDateTime::parse_from_str(&v, "%Y-%m-%d %H:%M:%S");
+                        let ts = NaiveDateTime::parse_from_str(v, "%Y-%m-%d %H:%M:%S");
                         let ts = if let Ok(ts) = ts {
                             ts
                         } else {
-                            let ts = NaiveDateTime::parse_from_str(&v, "%Y-%m-%d %H:%M:%S%.3f");
+                            let ts = NaiveDateTime::parse_from_str(v, "%Y-%m-%d %H:%M:%S%.3f");
                             if let Ok(ts) = ts {
                                 ts
                             } else {

@@ -229,7 +229,7 @@ pub fn get_table(
 
     let mut table_simples: Vec<TableSimple> = db
         .execute_sql_with_return(
-            &sql,
+            sql,
             &[
                 &Value::Text(table_name.name.to_string()),
                 &Value::Text(schema),
@@ -301,7 +301,7 @@ fn get_columnname_from_key(
 
     let column_name_simple: Result<Vec<ColumnNameSimple>, DbError> = db
         .execute_sql_with_return(
-            &sql,
+            sql,
             &[
                 &key_name.to_value(),
                 &table_name.name.to_value(),
@@ -387,7 +387,7 @@ fn get_table_key(db: &mut dyn Database, table_name: &TableName) -> Result<Vec<Ta
     };
 
     let table_key_simple: Result<Vec<TableKeySimple>, DbError> = db
-        .execute_sql_with_return(&sql, &[&table_name.name.to_value(), &schema.to_value()])
+        .execute_sql_with_return(sql, &[&table_name.name.to_value(), &schema.to_value()])
         .map(|rows| {
             rows.iter()
                 .map(|row| TableKeySimple {
@@ -451,7 +451,7 @@ fn get_foreign_key(
     "#;
 
     let foreign_key_simple: Result<Vec<ForeignKeySimple>, DbError> = db
-        .execute_sql_with_return(&sql, &[&foreign_key.to_value()])
+        .execute_sql_with_return(sql, &[&foreign_key.to_value()])
         .map(|rows| {
             rows.iter()
                 .map(|row| ForeignKeySimple {
@@ -490,7 +490,7 @@ fn get_referred_foreign_columns(
     "#;
 
     let foreign_columns: Result<Vec<ColumnNameSimple>, DbError> = db
-        .execute_sql_with_return(&sql, &[&foreign_key.to_value()])
+        .execute_sql_with_return(sql, &[&foreign_key.to_value()])
         .map(|rows| {
             rows.iter()
                 .map(|row| ColumnNameSimple {

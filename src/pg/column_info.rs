@@ -61,7 +61,7 @@ pub fn get_columns(
     };
     let columns_simple: Result<Vec<ColumnSimple>, DbError> = db
         .execute_sql_with_return(
-            &sql,
+            sql,
             &[
                 &table_name.name.to_value(),
                 &schema.to_value(),
@@ -198,7 +198,7 @@ fn get_column_specification(
                             if default == "uuid_generate_v4()" {
                                 Literal::UuidGenerateV4
                             } else {
-                                let v: Result<Uuid, _> = Uuid::parse_str(&default);
+                                let v: Result<Uuid, _> = Uuid::parse_str(default);
                                 match v {
                                     Ok(v) => Literal::Uuid(v),
                                     Err(e) => {
@@ -463,7 +463,7 @@ fn get_column_specification(
     //info!("sql: {} column_name: {}, table_name: {}", sql, column_name, table_name.name);
     let mut column_constraints: Vec<ColumnConstraintSimple> = db
         .execute_sql_with_return(
-            &sql,
+            sql,
             &[
                 &column_name.to_value(),
                 &table_name.name.to_value(),
@@ -510,7 +510,7 @@ fn get_column_stat(
     };
     let mut column_stat: Vec<ColumnStat> = db
         .execute_sql_with_return(
-            &sql,
+            sql,
             &[
                 &column_name.to_value(),
                 &table_name.name.to_value(),

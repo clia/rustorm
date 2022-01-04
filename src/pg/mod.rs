@@ -53,7 +53,7 @@ impl PostgresDB {
         sql: &str,
         param: &[&Value],
     ) -> Result<Rows, postgres::Error> {
-        let stmt = self.0.prepare(&sql)?;
+        let stmt = self.0.prepare(sql)?;
         let pg_values = to_pg_values(param);
         let sql_types = to_sql_types(&pg_values);
         let rows = stmt.query(&sql_types)?;
@@ -197,7 +197,7 @@ impl Database for PostgresDB {
                    ELSE rolvaliduntil
                    END AS valid_until
                FROM pg_authid";
-        let rows: Result<Rows, DbError> = self.execute_sql_with_return(&sql, &[]);
+        let rows: Result<Rows, DbError> = self.execute_sql_with_return(sql, &[]);
 
         rows.map(|rows| {
             rows.iter()
@@ -238,7 +238,7 @@ impl Database for PostgresDB {
                WHERE rolname = $1
                ";
         let rows: Result<Rows, DbError> =
-            self.execute_sql_with_return(&sql, &[&username.to_value()]);
+            self.execute_sql_with_return(sql, &[&username.to_value()]);
 
         rows.map(|rows| {
             rows.iter()
@@ -269,7 +269,7 @@ impl Database for PostgresDB {
             ON m.member = pg_roles.oid
             WHERE pg_roles.rolname = $1
         ";
-        self.execute_sql_with_return(&sql, &[&username.to_value()])
+        self.execute_sql_with_return(sql, &[&username.to_value()])
             .map(|rows| {
                 rows.iter()
                     .map(|row| Role {
@@ -285,7 +285,7 @@ impl Database for PostgresDB {
                         LEFT JOIN pg_shdescription ON objoid = pg_database.oid
                         WHERE datname = current_database()";
         let mut database_names: Vec<Option<DatabaseName>> =
-            self.execute_sql_with_return(&sql, &[]).map(|rows| {
+            self.execute_sql_with_return(sql, &[]).map(|rows| {
                 rows.iter()
                     .map(|row| {
                         row.get_opt("name")

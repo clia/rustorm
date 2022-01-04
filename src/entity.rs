@@ -328,7 +328,7 @@ impl EntityManager {
     where
         R: FromDao,
     {
-        let result: Result<Vec<R>, DbError> = self.execute_sql_with_return(sql, &params);
+        let result: Result<Vec<R>, DbError> = self.execute_sql_with_return(sql, params);
         match result {
             Ok(mut result) => match result.len() {
                 0 => Err(DbError::DataError(DataError::ZeroRecordReturned)),
@@ -347,7 +347,7 @@ impl EntityManager {
     where
         R: FromDao,
     {
-        let result: Result<Vec<R>, DbError> = self.execute_sql_with_return(sql, &params);
+        let result: Result<Vec<R>, DbError> = self.execute_sql_with_return(sql, params);
         match result {
             Ok(mut result) => match result.len() {
                 0 => Ok(None),

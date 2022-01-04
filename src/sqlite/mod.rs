@@ -91,7 +91,7 @@ impl Database for SqliteDB {
         println!("executing sql: {}", sql);
         info!("params: {:?}", params);
         println!("params: {:?}", params);
-        let stmt = self.0.prepare(&sql);
+        let stmt = self.0.prepare(sql);
 
         let column_names = if let Ok(ref stmt) = stmt {
             stmt.column_names()
@@ -194,7 +194,7 @@ impl Database for SqliteDB {
                             }
                             SqlType::Float | SqlType::Double | SqlType::Real | SqlType::Numeric => {
                                 // some defaults have cast type example: (0)::numeric
-                                let splinters = util::maybe_trim_parenthesis(&default)
+                                let splinters = util::maybe_trim_parenthesis(default)
                                     .split("::")
                                     .collect::<Vec<&str>>();
                                 let default_value = util::maybe_trim_parenthesis(splinters[0]);
@@ -216,7 +216,7 @@ impl Database for SqliteDB {
                                 if ic_default == "uuid_generate_v4()" {
                                     Literal::UuidGenerateV4
                                 } else {
-                                    let v: Result<Uuid, _> = Uuid::parse_str(&default);
+                                    let v: Result<Uuid, _> = Uuid::parse_str(default);
                                     match v {
                                         Ok(v) => Literal::Uuid(v),
                                         Err(e) => panic!(
