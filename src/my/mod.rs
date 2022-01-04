@@ -57,7 +57,7 @@ impl Database for MysqlDB {
             let column_names = columns
                 .map(|c| std::str::from_utf8(c.name_ref()).map(ToString::to_string))
                 .collect::<Result<Vec<String>, _>>()
-                .map_err(MysqlError::Utf8Error)?;
+                .map_err(MysqlError::Utf8)?;
 
             let mut records = Rows::new(column_names);
             for row in rows {
@@ -71,14 +71,14 @@ impl Database for MysqlDB {
             let rows = self
                 .0
                 .query(&sql)
-                .map_err(|e| MysqlError::SqlError(e, sql.to_string()))?;
+                .map_err(|e| MysqlError::Sql(e, sql.to_string()))?;
 
             collect(rows)
         } else {
             let stmt = self
                 .0
                 .prep(&sql)
-                .map_err(|e| MysqlError::SqlError(e, sql.to_string()))?;
+                .map_err(|e| MysqlError::Sql(e, sql.to_string()))?;
 
             let params: mysql::Params = param
                 .iter()
@@ -90,7 +90,7 @@ impl Database for MysqlDB {
             let rows = self
                 .0
                 .exec(stmt, &params)
-                .map_err(|e| MysqlError::SqlError(e, sql.to_string()))?;
+                .map_err(|e| MysqlError::Sql(e, sql.to_string()))?;
 
             collect(rows)
         }
@@ -480,19 +480,19 @@ fn into_record(
 #[derive(Debug, Error)]
 pub enum MysqlError {
     #[error("{0}")]
-    UrlError(#[from] mysql::UrlError),
+    Url(#[from] mysql::UrlError),
     #[error("Error executing {1}: {0}")]
-    SqlError(mysql::Error, String),
+    Sql(mysql::Error, String),
     #[error("{0}")]
-    Utf8Error(#[from] std::str::Utf8Error),
+    Utf8(#[from] std::str::Utf8Error),
     #[error("{0}")]
-    ConvertError(#[from] mysql::FromValueError),
+    Convert(#[from] mysql::FromValueError),
     #[error("Pool initialization error: {0}")]
-    PoolInitializationError(#[from] r2d2::Error),
+    PoolInitialization(#[from] r2d2::Error),
 }
 
 impl From<mysql::Error> for MysqlError {
     fn from(e: mysql::Error) -> Self {
-        MysqlError::SqlError(e, "Generic Error".into())
+        MysqlError::Sql(e, "Generic Error".into())
     }
 }

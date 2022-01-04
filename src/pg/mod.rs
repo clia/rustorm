@@ -28,20 +28,20 @@ pub fn init_pool(
 ) -> Result<r2d2::Pool<r2d2_postgres::PostgresConnectionManager>, PostgresError> {
     test_connection(db_url)?;
     let manager = r2d2_postgres::PostgresConnectionManager::new(db_url, TlsMode::None)
-        .map_err(|e| PostgresError::SqlError(e, "Connection Manager Error".into()))?;
+        .map_err(|e| PostgresError::Sql(e, "Connection Manager Error".into()))?;
     let pool = r2d2::Pool::new(manager)?;
     Ok(pool)
 }
 
 pub fn test_connection(db_url: &str) -> Result<(), PostgresError> {
     let manager = r2d2_postgres::PostgresConnectionManager::new(db_url, TlsMode::None)
-        .map_err(|e| PostgresError::SqlError(e, "Connection Manager Error".into()))?;
+        .map_err(|e| PostgresError::Sql(e, "Connection Manager Error".into()))?;
     let mut conn = manager
         .connect()
-        .map_err(|e| PostgresError::SqlError(e, "Connect Error".into()))?;
+        .map_err(|e| PostgresError::Sql(e, "Connect Error".into()))?;
     manager
         .is_valid(&mut conn)
-        .map_err(|e| PostgresError::SqlError(e, "Invalid Connection".into()))?;
+        .map_err(|e| PostgresError::Sql(e, "Invalid Connection".into()))?;
     Ok(())
 }
 
@@ -98,7 +98,7 @@ impl Database for PostgresDB {
 
     fn execute_sql_with_return(&mut self, sql: &str, param: &[&Value]) -> Result<Rows, DbError> {
         self.pg_execute_sql_with_return(sql, param).map_err(|e| {
-            Into::<DataOpError>::into(PlatformError::PostgresError(PostgresError::SqlError(
+            Into::<DataOpError>::into(PlatformError::PostgresError(PostgresError::Sql(
                 e,
                 sql.to_string(),
             )))
@@ -420,7 +420,7 @@ impl FromSql for OwnedPgValue {
                         let text = String::from_utf8(raw.to_owned());
                         match text {
                             Ok(text) => Ok(OwnedPgValue(Value::Text(text))),
-                            Err(e) => Err(Box::new(PostgresError::FromUtf8Error(e))),
+                            Err(e) => Err(Box::new(PostgresError::Utf8(e))),
                         }
                     }
                     types::BPCHAR => {
@@ -501,9 +501,9 @@ impl FromSql for OwnedPgValue {
 
 #[derive(Debug, Error)]
 pub enum PostgresError {
-    SqlError(postgres::Error, String),
-    FromUtf8Error(#[from] FromUtf8Error),
-    PoolInitializationError(#[from] r2d2::Error),
+    Sql(postgres::Error, String),
+    Utf8(#[from] FromUtf8Error),
+    PoolInitialization(#[from] r2d2::Error),
 }
 
 impl fmt::Display for PostgresError {

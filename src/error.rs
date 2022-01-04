@@ -54,7 +54,7 @@ impl From<PlatformError> for DataOpError {
         match platform_error {
             #[cfg(feature = "with-postgres")]
             PlatformError::PostgresError(postgres_err) => match postgres_err {
-                PostgresError::SqlError(ref pg_err, ref sql) => {
+                PostgresError::Sql(ref pg_err, ref sql) => {
                     if let Some(db_err) = pg_err.as_db() {
                         use crate::TableName;
                         let postgres::error::DbError {
