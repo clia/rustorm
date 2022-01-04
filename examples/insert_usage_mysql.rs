@@ -1,5 +1,5 @@
 use chrono::{offset::Utc, DateTime};
-use rustorm::{pool, DbError, FromDao, Pool, ToColumnNames, ToDao, ToTableName};
+use rustorm::{DbError, FromDao, Pool, ToColumnNames, ToDao, ToTableName};
 
 /// Run using:
 /// ```sh
@@ -28,7 +28,7 @@ fn main() {
 
     let db_url = "mysql://root:r00tpwdh3r3@localhost/sakila";
     let mut pool = Pool::new();
-    pool.ensure(db_url);
+    pool.ensure(db_url).expect("Connection pool doesn't exist");
     let mut em = pool.em(db_url).expect("Can not connect");
     let tom_cruise = for_insert::Actor {
         first_name: "TOM".into(),
