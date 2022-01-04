@@ -137,14 +137,14 @@ impl From<rusqlite::Error> for DbError {
 #[cfg(feature = "with-sqlite")]
 impl From<SqliteError> for DbError {
     fn from(e: SqliteError) -> Self {
-        DbError::DataOpError(PlatformError::SqliteError(e.into()).into())
+        DbError::DataOpError(PlatformError::SqliteError(e).into())
     }
 }
 
 #[cfg(feature = "with-mysql")]
 impl From<MysqlError> for DbError {
     fn from(e: MysqlError) -> Self {
-        DbError::DataOpError(PlatformError::MysqlError(e.into()).into())
+        DbError::DataOpError(PlatformError::MysqlError(e).into())
     }
 }
 
