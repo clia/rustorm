@@ -525,7 +525,7 @@ fn get_column_stat(
                 })
                 .collect()
         })?;
-    if column_stat.len() > 0 {
+    if !column_stat.is_empty() {
         Ok(Some(column_stat.remove(0)))
     } else {
         Ok(None)

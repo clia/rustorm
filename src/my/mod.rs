@@ -300,7 +300,7 @@ impl Database for MysqlDB {
                     .collect()
             })?;
 
-        if database_names.len() > 0 {
+        if !database_names.is_empty() {
             Ok(database_names.remove(0))
         } else {
             Ok(None)
