@@ -141,7 +141,6 @@ impl Database for SqliteDB {
             data_type: String,
             not_null: bool,
             default: Option<String>,
-            pk: bool,
         }
         impl ColumnSimple {
             fn to_column(&self, table_name: &TableName) -> ColumnDef {
@@ -334,7 +333,6 @@ impl Database for SqliteDB {
                 name,
                 data_type,
                 default,
-                pk,
                 not_null,
             };
             columns.push(simple.to_column(table_name));
