@@ -57,7 +57,7 @@ impl Database for MysqlDB {
             let column_names = columns
                 .map(|c| std::str::from_utf8(c.name_ref()).map(ToString::to_string))
                 .collect::<Result<Vec<String>, _>>()
-                .map_err(|e| MysqlError::Utf8Error(e))?;
+                .map_err(MysqlError::Utf8Error)?;
 
             let mut records = Rows::new(column_names);
             for row in rows {
