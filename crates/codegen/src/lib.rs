@@ -13,6 +13,7 @@ mod column_derive;
 mod dao_derive;
 #[macro_use]
 mod table_derive;
+mod util;
 
 use proc_macro::TokenStream;
 
