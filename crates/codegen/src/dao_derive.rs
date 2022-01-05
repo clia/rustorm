@@ -1,37 +1,35 @@
 use crate::util::find_crate_name;
 use proc_macro2::TokenStream;
+use syn::{
+    Data,
+    DeriveInput,
+    Field,
+    Ident,
+    Lit,
+    LitStr,
+};
 
-pub fn impl_from_dao(ast: &syn::DeriveInput) -> TokenStream {
+pub fn impl_from_dao(ast: &DeriveInput) -> TokenStream {
     let rustorm = find_crate_name();
     let name = &ast.ident;
-    let fields: Vec<(&syn::Ident, &syn::Type)> = match ast.data {
-        syn::Data::Struct(ref data) => {
-            data.fields
-                .iter()
-                .map(|f| {
-                    let ident = f.ident.as_ref().unwrap();
-                    let ty = &f.ty;
-                    (ident, ty)
-                })
-                .collect::<Vec<_>>()
-        }
-        syn::Data::Enum(_) | syn::Data::Union(_) => {
-            panic!("#[derive(FromDao)] can only be used with structs")
+
+    let fields = match ast.data {
+        Data::Struct(ref data) => data.fields.iter().map(parse_field),
+        Data::Enum(_) | Data::Union(_) => {
+            panic!("#[derive(ToDao)] can only be used with structs")
         }
     };
-    let from_fields: Vec<TokenStream> = fields
-        .iter()
-        .map(|&(field, _ty)| {
-            quote! { #field: dao.get(stringify!(#field)).unwrap(),}
-        })
-        .collect();
+
+    let get_fields = fields.map(|(column_name, field_name)| {
+        quote! { #field_name: dao.get(#column_name).unwrap(),}
+    });
 
     quote! {
         impl #rustorm::dao::FromDao for  #name {
 
             fn from_dao(dao: &#rustorm::Dao) -> Self {
                 #name {
-                    #(#from_fields)*
+                    #(#get_fields)*
                 }
 
             }
@@ -39,40 +37,37 @@ pub fn impl_from_dao(ast: &syn::DeriveInput) -> TokenStream {
     }
 }
 
-pub fn impl_to_dao(ast: &syn::DeriveInput) -> TokenStream {
+pub fn impl_to_dao(ast: &DeriveInput) -> TokenStream {
     let rustorm = find_crate_name();
     let name = &ast.ident;
     let generics = &ast.generics;
-    let fields: Vec<(&syn::Ident, &syn::Type)> = match ast.data {
-        syn::Data::Struct(ref data) => {
-            data.fields
-                .iter()
-                .map(|f| {
-                    let ident = f.ident.as_ref().unwrap();
-                    let ty = &f.ty;
-                    (ident, ty)
-                })
-                .collect::<Vec<_>>()
-        }
-        syn::Data::Enum(_) | syn::Data::Union(_) => {
+
+    let fields = match ast.data {
+        Data::Struct(ref data) => data.fields.iter().map(parse_field),
+        Data::Enum(_) | Data::Union(_) => {
             panic!("#[derive(ToDao)] can only be used with structs")
         }
     };
-    let from_fields: &Vec<TokenStream> = &fields
-        .iter()
-        .map(|&(field, _ty)| {
-            quote! { dao.insert(stringify!(#field), &self.#field);}
-        })
-        .collect();
+
+    let insert_fields = fields.map(|(column_name, field_name)| {
+        quote! { dao.insert(#column_name, &self.#field_name);}
+    });
 
     quote! {
         impl #generics #rustorm::dao::ToDao for #name #generics {
             fn to_dao(&self) -> #rustorm::Dao {
                 let mut dao = #rustorm::Dao::new();
-                #(#from_fields)*
+                #(#insert_fields)*
                 dao
             }
         }
 
     }
+}
+
+fn parse_field(field: &Field) -> (Lit, &Ident) {
+    let field_name = field.ident.as_ref().unwrap();
+    let column_name = LitStr::new(&field_name.to_string(), field_name.span()).into();
+
+    (column_name, field_name)
 }
