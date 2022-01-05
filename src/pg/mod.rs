@@ -517,7 +517,6 @@ mod test {
 
     use crate::{pool::*, Pool, *};
     use log::*;
-    use postgres::Connection;
     use std::ops::Deref;
 
     #[test]
@@ -588,7 +587,7 @@ mod test {
         let conn: PooledConn = conn.unwrap();
         match conn {
             PooledConn::PooledPg(ref pooled_pg) => {
-                let c: &Connection = pooled_pg.deref(); //explicit deref here
+                let c = pooled_pg.deref(); //explicit deref here
                 let rows = c.query("select 42, 'life'", &[]).unwrap();
                 for row in rows.iter() {
                     let n: i32 = row.get(0);
