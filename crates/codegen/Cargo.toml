@@ -15,6 +15,5 @@ quote = "1.0.14"
 rustorm_dao = { path = "../dao", version = "0.18.0" }
 syn = "1.0.84"
 
-
 [lib]
 proc-macro = true
