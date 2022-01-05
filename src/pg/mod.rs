@@ -4,6 +4,7 @@ use crate::db_auth::{Role, User};
 use crate::error::DataOpError;
 use crate::{error::PlatformError, table::SchemaContent, DbError, TableDef, TableName, Value, *};
 use bigdecimal::BigDecimal;
+use bytes::BytesMut;
 use geo_types::Point;
 use log::*;
 use postgres::{
@@ -337,7 +338,7 @@ impl<'a> ToSql for PgValue<'a> {
     fn to_sql(
         &self,
         ty: &Type,
-        out: &mut Vec<u8>,
+        out: &mut BytesMut,
     ) -> Result<IsNull, Box<dyn Error + 'static + Sync + Send>> {
         match *self.0 {
             Value::Bool(ref v) => v.to_sql(ty, out),

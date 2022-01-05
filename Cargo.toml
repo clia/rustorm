@@ -16,6 +16,7 @@ features = ["with-postgres"]
 [dependencies]
 bigdecimal = "0.0.14"
 byteorder = "1.0"
+bytes = "1.1.0"
 cfg-if = "0.1.2"
 chrono = "0.4.0"
 geo-types = "0.7.2"
