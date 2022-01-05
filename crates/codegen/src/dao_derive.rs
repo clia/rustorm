@@ -1,6 +1,8 @@
+use crate::util::find_crate_name;
 use proc_macro2::TokenStream;
 
 pub fn impl_from_dao(ast: &syn::DeriveInput) -> TokenStream {
+    let rustorm = find_crate_name();
     let name = &ast.ident;
     let fields: Vec<(&syn::Ident, &syn::Type)> = match ast.data {
         syn::Data::Struct(ref data) => {
@@ -25,9 +27,9 @@ pub fn impl_from_dao(ast: &syn::DeriveInput) -> TokenStream {
         .collect();
 
     quote! {
-        impl rustorm_dao::FromDao for  #name {
+        impl #rustorm::dao::FromDao for  #name {
 
-            fn from_dao(dao: &rustorm_dao::Dao) -> Self {
+            fn from_dao(dao: &#rustorm::Dao) -> Self {
                 #name {
                     #(#from_fields)*
                 }
@@ -38,6 +40,7 @@ pub fn impl_from_dao(ast: &syn::DeriveInput) -> TokenStream {
 }
 
 pub fn impl_to_dao(ast: &syn::DeriveInput) -> TokenStream {
+    let rustorm = find_crate_name();
     let name = &ast.ident;
     let generics = &ast.generics;
     let fields: Vec<(&syn::Ident, &syn::Type)> = match ast.data {
@@ -63,9 +66,9 @@ pub fn impl_to_dao(ast: &syn::DeriveInput) -> TokenStream {
         .collect();
 
     quote! {
-        impl #generics rustorm_dao::ToDao for #name #generics {
-            fn to_dao(&self) -> rustorm_dao::Dao {
-                let mut dao = rustorm_dao::Dao::new();
+        impl #generics #rustorm::dao::ToDao for #name #generics {
+            fn to_dao(&self) -> #rustorm::Dao {
+                let mut dao = #rustorm::Dao::new();
                 #(#from_fields)*
                 dao
             }

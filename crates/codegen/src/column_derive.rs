@@ -1,6 +1,8 @@
+use crate::util::find_crate_name;
 use proc_macro2::TokenStream;
 
 pub fn impl_to_column_names(ast: &syn::DeriveInput) -> TokenStream {
+    let rustorm = find_crate_name();
     let name = &ast.ident;
     let generics = &ast.generics;
     let fields: Vec<(&syn::Ident, &syn::Type)> = match ast.data {
@@ -22,7 +24,7 @@ pub fn impl_to_column_names(ast: &syn::DeriveInput) -> TokenStream {
         .iter()
         .map(|&(field, _ty)| {
             quote! {
-                rustorm_dao::ColumnName {
+                #rustorm::ColumnName {
                     name: stringify!(#field).into(),
                     table: Some(stringify!(#name).to_lowercase().into()),
                     alias: None,
@@ -32,8 +34,8 @@ pub fn impl_to_column_names(ast: &syn::DeriveInput) -> TokenStream {
         .collect();
 
     quote! {
-        impl #generics rustorm_dao::ToColumnNames for #name #generics {
-            fn to_column_names() -> Vec<rustorm_dao::ColumnName> {
+        impl #generics #rustorm::dao::ToColumnNames for #name #generics {
+            fn to_column_names() -> Vec<#rustorm::ColumnName> {
                 vec![
                     #(#from_fields)*
                 ]
