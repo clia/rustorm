@@ -28,8 +28,8 @@ postgres-shared = { version = "0.4.0", optional = true }
 r2d2 = "0.8.9"
 r2d2_mysql = { version = "21.0.0", optional = true }
 r2d2_postgres = { version = "0.14.0", optional = true }
-r2d2_sqlite = { version = "0.14", optional = true }
-rusqlite = { version = "0.21", optional = true }
+r2d2_sqlite = { version = "0.19.0", optional = true }
+rusqlite = { version = "0.26.3", optional = true }
 rustorm_dao = { path = "crates/dao", version = "0.18.0" }
 rustorm_codegen = { path = "crates/codegen", version = "0.18.0" }
 serde = { version = "1.0.15", features = ["derive"] }

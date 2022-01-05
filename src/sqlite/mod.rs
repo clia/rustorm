@@ -105,7 +105,7 @@ impl Database for SqliteDB {
                 let sq_values = to_sq_values(params);
                 let column_count = stmt.column_count();
                 let mut records = Rows::new(column_names);
-                if let Ok(mut rows) = stmt.query(sq_values) {
+                if let Ok(mut rows) = stmt.query(rusqlite::params_from_iter(&sq_values)) {
                     while let Some(row) = rows.next()? {
                         let mut record: Vec<Value> = vec![];
                         for i in 0..column_count {
