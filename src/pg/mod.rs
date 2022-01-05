@@ -64,12 +64,9 @@ impl PostgresDB {
         for r in rows.iter() {
             let mut record: Vec<Value> = vec![];
             for column_index in 0..column_count {
-                let value: Option<Result<OwnedPgValue, postgres::Error>> = r.get_opt(column_index);
+                let value: Option<OwnedPgValue> = r.get(column_index);
                 match value {
-                    Some(value) => {
-                        let value = value?;
-                        record.push(value.0)
-                    }
+                    Some(value) => record.push(value.0),
                     None => {
                         record.push(Value::Nil); // Note: this is important to not mess the spacing of records
                     }
