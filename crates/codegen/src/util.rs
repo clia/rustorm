@@ -9,6 +9,7 @@ use proc_macro2::{
 use quote::ToTokens;
 use syn::{
     Attribute,
+    DeriveInput,
     Ident,
     Lit,
     LitStr,
@@ -68,4 +69,17 @@ pub fn find_attribute_value(attributes: &[Attribute], key: &str) -> Option<LitSt
                 _ => panic!("invalid `{}` attribute", key),
             }
         })
+}
+
+/// Discover the table name to use for the [`DeriveInput`].
+///
+/// This is either the lower case type name or a custom name specified using a
+/// `#[table_name = "custom_name"]` attribute.
+///
+/// # Panics
+///
+/// If there's an invalid `table_name` attribute.
+pub fn parse_table_name(input: &DeriveInput) -> LitStr {
+    find_attribute_value(&input.attrs, "table_name")
+        .unwrap_or_else(|| LitStr::new(&input.ident.to_string().to_lowercase(), input.ident.span()))
 }
