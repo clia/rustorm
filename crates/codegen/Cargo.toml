@@ -11,6 +11,7 @@ edition = "2018"
 
 [dependencies]
 find-crate = "0.6.3"
+heck = "0.4"
 proc-macro2 = "1.0.36"
 quote = "1.0.14"
 rustorm_dao = { path = "../dao", version = "0.18.0" }

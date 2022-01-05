@@ -2,6 +2,7 @@ use find_crate::{
     find_crate,
     Manifest,
 };
+use heck::ToSnakeCase;
 use proc_macro2::{
     Span,
     TokenStream,
@@ -80,6 +81,7 @@ pub fn find_attribute_value(attributes: &[Attribute], key: &str) -> Option<LitSt
 ///
 /// If there's an invalid `table_name` attribute.
 pub fn parse_table_name(input: &DeriveInput) -> LitStr {
-    find_attribute_value(&input.attrs, "table_name")
-        .unwrap_or_else(|| LitStr::new(&input.ident.to_string().to_lowercase(), input.ident.span()))
+    find_attribute_value(&input.attrs, "table_name").unwrap_or_else(|| {
+        LitStr::new(&input.ident.to_string().to_snake_case(), input.ident.span())
+    })
 }
