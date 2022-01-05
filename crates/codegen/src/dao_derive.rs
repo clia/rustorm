@@ -76,6 +76,3 @@ pub fn impl_to_dao(ast: &syn::DeriveInput) -> TokenStream {
 
     }
 }
-
-#[cfg(test)]
-mod tests {}
