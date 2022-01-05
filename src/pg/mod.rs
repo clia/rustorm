@@ -4,7 +4,7 @@ use crate::db_auth::{Role, User};
 use crate::error::DataOpError;
 use crate::{error::PlatformError, table::SchemaContent, DbError, TableDef, TableName, Value, *};
 use bigdecimal::BigDecimal;
-use geo::Point;
+use geo_types::Point;
 use log::*;
 use postgres::{
     self,
