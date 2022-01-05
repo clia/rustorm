@@ -8,7 +8,12 @@ use proc_macro2::{
 };
 use quote::ToTokens;
 use syn::{
+    Attribute,
     Ident,
+    Lit,
+    LitStr,
+    Meta,
+    MetaNameValue,
     Token,
 };
 
@@ -39,6 +44,28 @@ pub fn find_crate_name() -> TokenStream {
                 Token![crate](Span::call_site()).into_token_stream()
             } else {
                 panic!("`rustorm` dependency not found");
+            }
+        })
+}
+
+/// Find an attribute of the form `#[key = "value"]` for the specified `key`.
+///
+/// Returns the `value`, if the attribute is found.
+///
+/// # Panics
+///
+/// The function will panic if the attribute is found but it does not follow the expected form.
+pub fn find_attribute_value(attributes: &[Attribute], key: &str) -> Option<LitStr> {
+    attributes
+        .iter()
+        .find(|attribute| attribute.path.is_ident(key))
+        .map(|attribute| {
+            match attribute.parse_meta() {
+                Ok(Meta::NameValue(MetaNameValue {
+                    lit: Lit::Str(value),
+                    ..
+                })) => value,
+                _ => panic!("invalid `{}` attribute", key),
             }
         })
 }
