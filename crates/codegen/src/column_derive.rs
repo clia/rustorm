@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 
-pub fn impl_to_column_names(ast: &syn::MacroInput) -> TokenStream {
+pub fn impl_to_column_names(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let generics = &ast.generics;
     let fields: Vec<(&syn::Ident, &syn::Type)> = match ast.body {

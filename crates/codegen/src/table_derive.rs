@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 
-pub fn impl_to_table_name(ast: &syn::MacroInput) -> TokenStream {
+pub fn impl_to_table_name(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let generics = &ast.generics;
 
