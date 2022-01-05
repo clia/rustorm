@@ -56,7 +56,7 @@ impl PostgresDB {
         let stmt = self.0.prepare(sql)?;
         let pg_values = to_pg_values(param);
         let sql_types = to_sql_types(&pg_values);
-        let rows = stmt.query(&sql_types)?;
+        let rows = self.0.query(&stmt, &*sql_types)?;
         let columns = rows.columns();
         let column_names: Vec<String> = columns.iter().map(|c| c.name().to_string()).collect();
         let mut records = Rows::new(column_names);
@@ -310,10 +310,10 @@ fn to_pg_values<'a>(values: &[&'a Value]) -> Vec<PgValue<'a>> {
     values.iter().map(|v| PgValue(v)).collect()
 }
 
-fn to_sql_types<'a>(values: &'a [PgValue]) -> Vec<&'a dyn ToSql> {
+fn to_sql_types<'a>(values: &'a [PgValue]) -> Vec<&'a (dyn ToSql + Sync)> {
     let mut sql_types = vec![];
     for v in values.iter() {
-        sql_types.push(&*v as &dyn ToSql);
+        sql_types.push(&*v as &(dyn ToSql + Sync));
     }
     sql_types
 }
