@@ -1,5 +1,8 @@
 use rustorm::{
+    dao,
+    Dao,
     FromDao,
+    TableName,
     ToDao,
     ToTableName,
 };

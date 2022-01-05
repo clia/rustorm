@@ -3,9 +3,13 @@ use chrono::{
     DateTime,
 };
 use rustorm::{
+    dao,
+    ColumnName,
+    Dao,
     DbError,
     FromDao,
     Pool,
+    TableName,
     ToColumnNames,
     ToDao,
     ToTableName,

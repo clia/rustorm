@@ -4,9 +4,13 @@ use chrono::{
     NaiveTime,
 };
 use rustorm::{
+    dao,
+    ColumnName,
+    Dao,
     DbError,
     FromDao,
     Pool,
+    TableName,
     ToColumnNames,
     ToDao,
     ToTableName,
