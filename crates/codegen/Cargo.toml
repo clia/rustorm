@@ -10,7 +10,8 @@ keywords = ["orm", "postgresql", "sqlite"]
 edition = "2018"
 
 [dependencies]
-quote = "0.3.15"
+proc-macro2 = "1.0.36"
+quote = "1.0.14"
 rustorm_dao = { path = "../dao", version = "0.18.0" }
 syn = "0.11.11"
 

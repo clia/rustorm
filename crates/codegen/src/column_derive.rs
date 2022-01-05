@@ -1,7 +1,6 @@
-use quote;
-use syn;
+use proc_macro2::TokenStream;
 
-pub fn impl_to_column_names(ast: &syn::MacroInput) -> quote::Tokens {
+pub fn impl_to_column_names(ast: &syn::MacroInput) -> TokenStream {
     let name = &ast.ident;
     let generics = &ast.generics;
     let fields: Vec<(&syn::Ident, &syn::Ty)> = match ast.body {
@@ -22,7 +21,7 @@ pub fn impl_to_column_names(ast: &syn::MacroInput) -> quote::Tokens {
         }
         syn::Body::Enum(_) => panic!("#[derive(ToColumnNames)] can only be used with structs"),
     };
-    let from_fields: Vec<quote::Tokens> = fields
+    let from_fields: Vec<TokenStream> = fields
         .iter()
         .map(|&(field, _ty)| {
             quote! {

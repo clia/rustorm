@@ -1,7 +1,6 @@
-use quote;
-use syn;
+use proc_macro2::TokenStream;
 
-pub fn impl_from_dao(ast: &syn::MacroInput) -> quote::Tokens {
+pub fn impl_from_dao(ast: &syn::MacroInput) -> TokenStream {
     let name = &ast.ident;
     let fields: Vec<(&syn::Ident, &syn::Ty)> = match ast.body {
         syn::Body::Struct(ref data) => {
@@ -21,7 +20,7 @@ pub fn impl_from_dao(ast: &syn::MacroInput) -> quote::Tokens {
         }
         syn::Body::Enum(_) => panic!("#[derive(FromDao)] can only be used with structs"),
     };
-    let from_fields: Vec<quote::Tokens> = fields
+    let from_fields: Vec<TokenStream> = fields
         .iter()
         .map(|&(field, _ty)| {
             quote! { #field: dao.get(stringify!(#field)).unwrap(),}
@@ -41,7 +40,7 @@ pub fn impl_from_dao(ast: &syn::MacroInput) -> quote::Tokens {
     }
 }
 
-pub fn impl_to_dao(ast: &syn::MacroInput) -> quote::Tokens {
+pub fn impl_to_dao(ast: &syn::MacroInput) -> TokenStream {
     let name = &ast.ident;
     let generics = &ast.generics;
     let fields: Vec<(&syn::Ident, &syn::Ty)> = match ast.body {
@@ -62,7 +61,7 @@ pub fn impl_to_dao(ast: &syn::MacroInput) -> quote::Tokens {
         }
         syn::Body::Enum(_) => panic!("#[derive(ToDao)] can only be used with structs"),
     };
-    let from_fields: &Vec<quote::Tokens> = &fields
+    let from_fields: &Vec<TokenStream> = &fields
         .iter()
         .map(|&(field, _ty)| {
             quote! { dao.insert(stringify!(#field), &self.#field);}
