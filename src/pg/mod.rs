@@ -9,9 +9,9 @@ use log::*;
 use postgres::{
     self,
     types::{self, to_sql_checked, FromSql, IsNull, Kind, ToSql, Type},
+    NoTls,
 };
 use r2d2::{self, ManageConnection};
-use r2d2_postgres::{self, TlsMode};
 use rustorm_dao::{value::Array, Interval, Rows};
 use std::{error::Error, fmt, string::FromUtf8Error};
 use thiserror::Error;
@@ -24,17 +24,17 @@ mod table_info;
 
 pub fn init_pool(
     db_url: &str,
-) -> Result<r2d2::Pool<r2d2_postgres::PostgresConnectionManager>, PostgresError> {
-    test_connection(db_url)?;
-    let manager = r2d2_postgres::PostgresConnectionManager::new(db_url, TlsMode::None)
-        .map_err(|e| PostgresError::Sql(e, "Connection Manager Error".into()))?;
+) -> Result<r2d2::Pool<r2d2_postgres::PostgresConnectionManager<NoTls>>, PostgresError> {
+    let mut config = postgres::Config::new();
+    config.host(db_url);
+    test_connection(config.clone())?;
+    let manager = r2d2_postgres::PostgresConnectionManager::new(config, NoTls);
     let pool = r2d2::Pool::new(manager)?;
     Ok(pool)
 }
 
-pub fn test_connection(db_url: &str) -> Result<(), PostgresError> {
-    let manager = r2d2_postgres::PostgresConnectionManager::new(db_url, TlsMode::None)
-        .map_err(|e| PostgresError::Sql(e, "Connection Manager Error".into()))?;
+pub fn test_connection(config: postgres::Config) -> Result<(), PostgresError> {
+    let manager = r2d2_postgres::PostgresConnectionManager::new(config, NoTls);
     let mut conn = manager
         .connect()
         .map_err(|e| PostgresError::Sql(e, "Connect Error".into()))?;
@@ -44,7 +44,7 @@ pub fn test_connection(db_url: &str) -> Result<(), PostgresError> {
     Ok(())
 }
 
-pub struct PostgresDB(pub r2d2::PooledConnection<r2d2_postgres::PostgresConnectionManager>);
+pub struct PostgresDB(pub r2d2::PooledConnection<r2d2_postgres::PostgresConnectionManager<NoTls>>);
 
 impl PostgresDB {
     fn pg_execute_sql_with_return(

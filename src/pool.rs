@@ -21,13 +21,14 @@ use crate::{
     platform::Platform,
     DBPlatform, DaoManager, DbError, EntityManager,
 };
+use postgres::NoTls;
 use std::{collections::BTreeMap, convert::TryFrom};
 
 #[derive(Default)]
 pub struct Pool(BTreeMap<String, ConnPool>);
 pub enum ConnPool {
     #[cfg(feature = "with-postgres")]
-    PoolPg(r2d2::Pool<PostgresConnectionManager>),
+    PoolPg(r2d2::Pool<PostgresConnectionManager<NoTls>>),
     #[cfg(feature = "with-sqlite")]
     PoolSq(r2d2::Pool<SqliteConnectionManager>),
     #[cfg(feature = "with-mysql")]
@@ -36,7 +37,7 @@ pub enum ConnPool {
 
 pub enum PooledConn {
     #[cfg(feature = "with-postgres")]
-    PooledPg(Box<r2d2::PooledConnection<PostgresConnectionManager>>),
+    PooledPg(Box<r2d2::PooledConnection<PostgresConnectionManager<NoTls>>>),
     #[cfg(feature = "with-sqlite")]
     PooledSq(Box<r2d2::PooledConnection<SqliteConnectionManager>>),
     #[cfg(feature = "with-mysql")]
@@ -276,7 +277,9 @@ pub fn test_connection(db_url: &str) -> Result<(), DbError> {
         Ok(platform) => match platform {
             #[cfg(feature = "with-postgres")]
             Platform::Postgres => {
-                pg::test_connection(db_url)?;
+                let mut config = postgres::Config::new();
+                config.host(db_url);
+                pg::test_connection(config)?;
                 Ok(())
             }
             #[cfg(feature = "with-sqlite")]
