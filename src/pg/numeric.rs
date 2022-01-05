@@ -1,10 +1,11 @@
 ///
 /// Copied from diesel
 ///
-use byteorder::{NetworkEndian, ReadBytesExt, WriteBytesExt};
+use byteorder::{NetworkEndian, ReadBytesExt};
+use bytes::{BufMut, BytesMut};
 use std::error::Error;
 
-use postgres::types::{self, FromSql, IsNull, ToSql, Type};
+use postgres::types::{to_sql_checked, FromSql, IsNull, ToSql, Type};
 
 use bigdecimal::BigDecimal;
 use num_bigint::{BigInt, BigUint, Sign};
@@ -42,8 +43,8 @@ impl Error for InvalidNumericSign {
     }
 }
 
-impl FromSql for PgNumeric {
-    fn from_sql(_ty: &Type, bytes: &[u8]) -> Result<Self, Box<dyn Error + Send + Sync>> {
+impl<'b> FromSql<'b> for PgNumeric {
+    fn from_sql(_ty: &Type, bytes: &'b [u8]) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let mut bytes = <&[u8]>::clone(&bytes);
         let ndigits = bytes.read_u16::<NetworkEndian>()?;
         let mut digits = Vec::with_capacity(ndigits as usize);
@@ -72,7 +73,7 @@ impl FromSql for PgNumeric {
 
     fn accepts(ty: &Type) -> bool {
         match *ty {
-            types::NUMERIC => true,
+            Type::NUMERIC => true,
             _ => panic!("can not accept type {:?}", ty),
         }
     }
@@ -84,7 +85,7 @@ impl ToSql for PgNumeric {
     fn to_sql(
         &self,
         _ty: &Type,
-        out: &mut Vec<u8>,
+        out: &mut BytesMut,
     ) -> Result<IsNull, Box<dyn Error + Sync + Send>> {
         let sign = match *self {
             PgNumeric::Positive { .. } => 0,
@@ -106,19 +107,19 @@ impl ToSql for PgNumeric {
             PgNumeric::Positive { scale, .. } | PgNumeric::Negative { scale, .. } => scale,
             PgNumeric::NaN => 0,
         };
-        out.write_u16::<NetworkEndian>(digits.len() as u16)?;
-        out.write_i16::<NetworkEndian>(weight)?;
-        out.write_u16::<NetworkEndian>(sign)?;
-        out.write_u16::<NetworkEndian>(scale)?;
+        out.put_u16(digits.len() as u16);
+        out.put_i16(weight);
+        out.put_u16(sign);
+        out.put_u16(scale);
         for digit in digits.iter() {
-            out.write_i16::<NetworkEndian>(*digit)?;
+            out.put_i16(*digit);
         }
 
         Ok(IsNull::No)
     }
 
     fn accepts(ty: &Type) -> bool {
-        matches!(*ty, types::NUMERIC)
+        matches!(*ty, Type::NUMERIC)
     }
 }
 

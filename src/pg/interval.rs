@@ -6,7 +6,7 @@
 /// meaning of these parts.
 ///
 use byteorder::{BigEndian, ReadBytesExt};
-use postgres::types::{self, FromSql, Type};
+use postgres::types::{FromSql, Type};
 use std::error::Error;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -60,8 +60,8 @@ impl PgInterval {
     */
 }
 
-impl FromSql for PgInterval {
-    fn from_sql(_ty: &Type, bytes: &[u8]) -> Result<Self, Box<dyn Error + Send + Sync>> {
+impl<'b> FromSql<'b> for PgInterval {
+    fn from_sql(_ty: &Type, bytes: &'b [u8]) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let mut bytes = <&[u8]>::clone(&bytes);
         let ms = bytes.read_i64::<BigEndian>()?;
         let days = bytes.read_i32::<BigEndian>()?;
@@ -70,6 +70,6 @@ impl FromSql for PgInterval {
     }
 
     fn accepts(ty: &Type) -> bool {
-        matches!(*ty, types::INTERVAL)
+        matches!(*ty, Type::INTERVAL)
     }
 }

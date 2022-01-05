@@ -55,38 +55,26 @@ impl From<PlatformError> for DataOpError {
             #[cfg(feature = "with-postgres")]
             PlatformError::PostgresError(postgres_err) => match postgres_err {
                 PostgresError::Sql(ref pg_err, ref sql) => {
-                    if let Some(db_err) = pg_err.as_db() {
+                    if let Some(db_err) = pg_err.as_db_error() {
                         use crate::TableName;
-                        let postgres::error::DbError {
-                            severity,
-                            code,
-                            message,
-                            detail,
-                            schema,
-                            table,
-                            column,
-                            datatype,
-                            constraint,
-                            ..
-                        } = db_err;
 
                         DataOpError::ConstraintError {
-                            severity: severity.clone(),
-                            code: code.code().to_string(),
-                            message: message.clone(),
-                            detail: detail.clone(),
-                            cause_table: table.as_ref().map(|table| {
+                            severity: db_err.severity().to_owned(),
+                            code: db_err.code().code().to_string(),
+                            message: db_err.message().to_owned(),
+                            detail: db_err.detail().map(String::from),
+                            cause_table: db_err.table().map(|table| {
                                 TableName {
                                     name: table.to_string(),
-                                    schema: schema.clone(),
+                                    schema: db_err.schema().map(String::from),
                                     alias: None,
                                 }
                                 .complete_name()
                             }),
-                            constraint: constraint.clone(),
-                            column: column.clone(),
-                            datatype: datatype.clone(),
-                            sql: sql.to_string(),
+                            constraint: db_err.constraint().map(String::from),
+                            column: db_err.column().map(String::from),
+                            datatype: db_err.datatype().map(String::from),
+                            sql: sql.to_owned(),
                         }
                     } else {
                         DataOpError::GenericError {

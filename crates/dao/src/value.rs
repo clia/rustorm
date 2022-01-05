@@ -2,7 +2,7 @@
 use crate::{interval::Interval, ConvertError};
 use bigdecimal::{BigDecimal, ToPrimitive};
 use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
-use geo::Point;
+use geo_types::Point;
 use serde_derive::{Deserialize, Serialize};
 use std::fmt;
 use uuid::Uuid;
