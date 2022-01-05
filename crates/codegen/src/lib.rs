@@ -31,14 +31,14 @@ pub fn to_dao(tokens: TokenStream) -> TokenStream {
     dao_derive::impl_to_dao(&input).into()
 }
 
-#[proc_macro_derive(ToTableName)]
+#[proc_macro_derive(ToTableName, attributes(table_name))]
 pub fn to_table_name(tokens: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(tokens as syn::DeriveInput);
 
     table_derive::impl_to_table_name(&input).into()
 }
 
-#[proc_macro_derive(ToColumnNames, attributes(column_name))]
+#[proc_macro_derive(ToColumnNames, attributes(column_name, table_name))]
 pub fn to_column_names(tokens: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(tokens as syn::DeriveInput);
 
