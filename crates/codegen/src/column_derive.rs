@@ -3,23 +3,20 @@ use proc_macro2::TokenStream;
 pub fn impl_to_column_names(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let generics = &ast.generics;
-    let fields: Vec<(&syn::Ident, &syn::Type)> = match ast.body {
-        syn::Body::Struct(ref data) => {
-            match *data {
-                syn::VariantData::Struct(ref fields) => {
-                    fields
-                        .iter()
-                        .map(|f| {
-                            let ident = f.ident.as_ref().unwrap();
-                            let ty = &f.ty;
-                            (ident, ty)
-                        })
-                        .collect::<Vec<_>>()
-                }
-                _ => panic!("Only struct is supported for #[derive(ToColumnNames)]"),
-            }
+    let fields: Vec<(&syn::Ident, &syn::Type)> = match ast.data {
+        syn::Data::Struct(ref data) => {
+            data.fields
+                .iter()
+                .map(|f| {
+                    let ident = f.ident.as_ref().unwrap();
+                    let ty = &f.ty;
+                    (ident, ty)
+                })
+                .collect::<Vec<_>>()
         }
-        syn::Body::Enum(_) => panic!("#[derive(ToColumnNames)] can only be used with structs"),
+        syn::Data::Enum(_) | syn::Data::Union(_) => {
+            panic!("#[derive(ToColumnNames)] can only be used with structs")
+        }
     };
     let from_fields: Vec<TokenStream> = fields
         .iter()
