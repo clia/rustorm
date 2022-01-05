@@ -57,13 +57,14 @@ impl PostgresDB {
         let pg_values = to_pg_values(param);
         let sql_types = to_sql_types(&pg_values);
         let rows = self.0.query(&stmt, &*sql_types)?;
-        let columns = rows.columns();
-        let column_names: Vec<String> = columns.iter().map(|c| c.name().to_string()).collect();
+        let columns = rows.first().into_iter().flat_map(postgres::Row::columns);
+        let column_names: Vec<String> = columns.map(|c| c.name().to_string()).collect();
+        let column_count = column_names.len();
         let mut records = Rows::new(column_names);
         for r in rows.iter() {
             let mut record: Vec<Value> = vec![];
-            for (i, _column) in columns.iter().enumerate() {
-                let value: Option<Result<OwnedPgValue, postgres::Error>> = r.get_opt(i);
+            for column_index in 0..column_count {
+                let value: Option<Result<OwnedPgValue, postgres::Error>> = r.get_opt(column_index);
                 match value {
                     Some(value) => {
                         let value = value?;
