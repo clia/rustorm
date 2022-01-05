@@ -4,7 +4,7 @@
 use byteorder::{NetworkEndian, ReadBytesExt, WriteBytesExt};
 use std::error::Error;
 
-use postgres::types::{self, FromSql, IsNull, ToSql, Type};
+use postgres::types::{self, to_sql_checked, FromSql, IsNull, ToSql, Type};
 
 use bigdecimal::BigDecimal;
 use num_bigint::{BigInt, BigUint, Sign};

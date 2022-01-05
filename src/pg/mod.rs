@@ -8,9 +8,8 @@ use geo_types::Point;
 use log::*;
 use postgres::{
     self,
-    types::{self, FromSql, IsNull, ToSql, Type},
+    types::{self, to_sql_checked, FromSql, IsNull, Kind, ToSql, Type},
 };
-use postgres_shared::types::{Kind, Kind::Enum};
 use r2d2::{self, ManageConnection};
 use r2d2_postgres::{self, TlsMode};
 use rustorm_dao::{value::Array, Interval, Rows};
@@ -386,11 +385,11 @@ impl FromSql for OwnedPgValue {
         }
         let kind = ty.kind();
         match *kind {
-            Enum(_) => match_type!(Text),
+            Kind::Enum(_) => match_type!(Text),
             Kind::Array(ref array_type) => {
                 let array_type_kind = array_type.kind();
                 match *array_type_kind {
-                    Enum(_) => FromSql::from_sql(ty, raw)
+                    Kind::Enum(_) => FromSql::from_sql(ty, raw)
                         .map(|v| OwnedPgValue(Value::Array(Array::Text(v)))),
                     _ => match *ty {
                         types::TEXT_ARRAY | types::NAME_ARRAY | types::VARCHAR_ARRAY => {

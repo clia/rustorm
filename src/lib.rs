@@ -18,8 +18,6 @@ use cfg_if::cfg_if;
 cfg_if! {if #[cfg(feature = "with-postgres")]{
     extern crate r2d2_postgres;
     extern crate postgres;
-    #[macro_use]
-    extern crate postgres_shared;
     mod pg;
 }}
 cfg_if! {if #[cfg(feature = "with-sqlite")]{
