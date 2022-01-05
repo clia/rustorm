@@ -53,51 +53,59 @@ impl From<PlatformError> for DataOpError {
     fn from(platform_error: PlatformError) -> Self {
         match platform_error {
             #[cfg(feature = "with-postgres")]
-            PlatformError::PostgresError(postgres_err) => match postgres_err {
-                PostgresError::Sql(ref pg_err, ref sql) => {
-                    if let Some(db_err) = pg_err.as_db_error() {
-                        use crate::TableName;
+            PlatformError::PostgresError(postgres_err) => {
+                match postgres_err {
+                    PostgresError::Sql(ref pg_err, ref sql) => {
+                        if let Some(db_err) = pg_err.as_db_error() {
+                            use crate::TableName;
 
-                        DataOpError::ConstraintError {
-                            severity: db_err.severity().to_owned(),
-                            code: db_err.code().code().to_string(),
-                            message: db_err.message().to_owned(),
-                            detail: db_err.detail().map(String::from),
-                            cause_table: db_err.table().map(|table| {
-                                TableName {
-                                    name: table.to_string(),
-                                    schema: db_err.schema().map(String::from),
-                                    alias: None,
-                                }
-                                .complete_name()
-                            }),
-                            constraint: db_err.constraint().map(String::from),
-                            column: db_err.column().map(String::from),
-                            datatype: db_err.datatype().map(String::from),
-                            sql: sql.to_owned(),
+                            DataOpError::ConstraintError {
+                                severity: db_err.severity().to_owned(),
+                                code: db_err.code().code().to_string(),
+                                message: db_err.message().to_owned(),
+                                detail: db_err.detail().map(String::from),
+                                cause_table: db_err.table().map(|table| {
+                                    TableName {
+                                        name: table.to_string(),
+                                        schema: db_err.schema().map(String::from),
+                                        alias: None,
+                                    }
+                                    .complete_name()
+                                }),
+                                constraint: db_err.constraint().map(String::from),
+                                column: db_err.column().map(String::from),
+                                datatype: db_err.datatype().map(String::from),
+                                sql: sql.to_owned(),
+                            }
+                        } else {
+                            DataOpError::GenericError {
+                                message: postgres_err.to_string(),
+                                sql: None,
+                            }
                         }
-                    } else {
+                    }
+                    _ => {
                         DataOpError::GenericError {
                             message: postgres_err.to_string(),
                             sql: None,
                         }
                     }
                 }
-                _ => DataOpError::GenericError {
-                    message: postgres_err.to_string(),
-                    sql: None,
-                },
-            },
+            }
             #[cfg(feature = "with-sqlite")]
-            PlatformError::SqliteError(e) => DataOpError::GenericError {
-                message: e.to_string(),
-                sql: None,
-            },
+            PlatformError::SqliteError(e) => {
+                DataOpError::GenericError {
+                    message: e.to_string(),
+                    sql: None,
+                }
+            }
             #[cfg(feature = "with-mysql")]
-            PlatformError::MysqlError(e) => DataOpError::GenericError {
-                message: e.to_string(),
-                sql: None,
-            },
+            PlatformError::MysqlError(e) => {
+                DataOpError::GenericError {
+                    message: e.to_string(),
+                    sql: None,
+                }
+            }
         }
     }
 }
@@ -106,9 +114,7 @@ impl From<PlatformError> for DataOpError {
 //platform error
 #[cfg(feature = "with-postgres")]
 impl From<PostgresError> for DbError {
-    fn from(e: PostgresError) -> Self {
-        DbError::DataOpError(PlatformError::from(e).into())
-    }
+    fn from(e: PostgresError) -> Self { DbError::DataOpError(PlatformError::from(e).into()) }
 }
 
 #[cfg(feature = "with-sqlite")]
@@ -120,16 +126,12 @@ impl From<rusqlite::Error> for DbError {
 
 #[cfg(feature = "with-sqlite")]
 impl From<SqliteError> for DbError {
-    fn from(e: SqliteError) -> Self {
-        DbError::DataOpError(PlatformError::SqliteError(e).into())
-    }
+    fn from(e: SqliteError) -> Self { DbError::DataOpError(PlatformError::SqliteError(e).into()) }
 }
 
 #[cfg(feature = "with-mysql")]
 impl From<MysqlError> for DbError {
-    fn from(e: MysqlError) -> Self {
-        DbError::DataOpError(PlatformError::MysqlError(e).into())
-    }
+    fn from(e: MysqlError) -> Self { DbError::DataOpError(PlatformError::MysqlError(e).into()) }
 }
 
 #[derive(Debug, Error)]

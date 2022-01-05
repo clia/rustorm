@@ -1,20 +1,54 @@
-use self::{interval::PgInterval, numeric::PgNumeric};
+use self::{
+    interval::PgInterval,
+    numeric::PgNumeric,
+};
 #[cfg(feature = "db-auth")]
-use crate::db_auth::{Role, User};
-use crate::error::DataOpError;
-use crate::{error::PlatformError, table::SchemaContent, DbError, TableDef, TableName, Value, *};
+use crate::db_auth::{
+    Role,
+    User,
+};
+use crate::{
+    error::{
+        DataOpError,
+        PlatformError,
+    },
+    table::SchemaContent,
+    DbError,
+    TableDef,
+    TableName,
+    Value,
+    *,
+};
 use bigdecimal::BigDecimal;
 use bytes::BytesMut;
 use geo_types::Point;
 use log::*;
 use postgres::{
     self,
-    types::{to_sql_checked, FromSql, IsNull, Kind, ToSql, Type},
+    types::{
+        to_sql_checked,
+        FromSql,
+        IsNull,
+        Kind,
+        ToSql,
+        Type,
+    },
     NoTls,
 };
-use r2d2::{self, ManageConnection};
-use rustorm_dao::{value::Array, Interval, Rows};
-use std::{error::Error, fmt, string::FromUtf8Error};
+use r2d2::{
+    self,
+    ManageConnection,
+};
+use rustorm_dao::{
+    value::Array,
+    Interval,
+    Rows,
+};
+use std::{
+    error::Error,
+    fmt,
+    string::FromUtf8Error,
+};
 use thiserror::Error;
 
 mod column_info;
@@ -199,18 +233,22 @@ impl Database for PostgresDB {
 
         rows.map(|rows| {
             rows.iter()
-                .map(|row| User {
-                    sysid: row.get("sysid").expect("sysid"),
-                    username: row.get("username").expect("username"),
-                    is_superuser: row.get("is_superuser").expect("is_superuser"),
-                    is_inherit: row.get("is_inherit").expect("is_inherit"),
-                    can_create_db: row.get("can_create_db").expect("can_create_db"),
-                    can_create_role: row.get("can_create_role").expect("can_create_role"),
-                    can_login: row.get("can_login").expect("can_login"),
-                    can_do_replication: row.get("can_do_replication").expect("can_do_replication"),
-                    can_bypass_rls: row.get("can_bypass_rls").expect("can_bypass_rls"),
-                    valid_until: row.get("valid_until").expect("valid_until"),
-                    conn_limit: row.get("conn_limit").expect("conn_limit"),
+                .map(|row| {
+                    User {
+                        sysid: row.get("sysid").expect("sysid"),
+                        username: row.get("username").expect("username"),
+                        is_superuser: row.get("is_superuser").expect("is_superuser"),
+                        is_inherit: row.get("is_inherit").expect("is_inherit"),
+                        can_create_db: row.get("can_create_db").expect("can_create_db"),
+                        can_create_role: row.get("can_create_role").expect("can_create_role"),
+                        can_login: row.get("can_login").expect("can_login"),
+                        can_do_replication: row
+                            .get("can_do_replication")
+                            .expect("can_do_replication"),
+                        can_bypass_rls: row.get("can_bypass_rls").expect("can_bypass_rls"),
+                        valid_until: row.get("valid_until").expect("valid_until"),
+                        conn_limit: row.get("conn_limit").expect("conn_limit"),
+                    }
                 })
                 .collect()
         })
@@ -240,18 +278,22 @@ impl Database for PostgresDB {
 
         rows.map(|rows| {
             rows.iter()
-                .map(|row| User {
-                    sysid: row.get("sysid").expect("sysid"),
-                    username: row.get("username").expect("username"),
-                    is_superuser: row.get("is_superuser").expect("is_superuser"),
-                    is_inherit: row.get("is_inherit").expect("is_inherit"),
-                    can_create_db: row.get("can_create_db").expect("can_create_db"),
-                    can_create_role: row.get("can_create_role").expect("can_create_role"),
-                    can_login: row.get("can_login").expect("can_login"),
-                    can_do_replication: row.get("can_do_replication").expect("can_do_replication"),
-                    can_bypass_rls: row.get("can_bypass_rls").expect("can_bypass_rls"),
-                    valid_until: row.get("valid_until").expect("valid_until"),
-                    conn_limit: row.get("conn_limit").expect("conn_limit"),
+                .map(|row| {
+                    User {
+                        sysid: row.get("sysid").expect("sysid"),
+                        username: row.get("username").expect("username"),
+                        is_superuser: row.get("is_superuser").expect("is_superuser"),
+                        is_inherit: row.get("is_inherit").expect("is_inherit"),
+                        can_create_db: row.get("can_create_db").expect("can_create_db"),
+                        can_create_role: row.get("can_create_role").expect("can_create_role"),
+                        can_login: row.get("can_login").expect("can_login"),
+                        can_do_replication: row
+                            .get("can_do_replication")
+                            .expect("can_do_replication"),
+                        can_bypass_rls: row.get("can_bypass_rls").expect("can_bypass_rls"),
+                        valid_until: row.get("valid_until").expect("valid_until"),
+                        conn_limit: row.get("conn_limit").expect("conn_limit"),
+                    }
                 })
                 .collect()
         })
@@ -270,8 +312,10 @@ impl Database for PostgresDB {
         self.execute_sql_with_return(sql, &[&username.to_value()])
             .map(|rows| {
                 rows.iter()
-                    .map(|row| Role {
-                        role_name: row.get("role_name").expect("role_name"),
+                    .map(|row| {
+                        Role {
+                            role_name: row.get("role_name").expect("role_name"),
+                        }
                     })
                     .collect()
             })
@@ -286,12 +330,12 @@ impl Database for PostgresDB {
             self.execute_sql_with_return(sql, &[]).map(|rows| {
                 rows.iter()
                     .map(|row| {
-                        row.get_opt("name")
-                            .expect("must not error")
-                            .map(|name| DatabaseName {
+                        row.get_opt("name").expect("must not error").map(|name| {
+                            DatabaseName {
                                 name,
                                 description: None,
-                            })
+                            }
+                        })
                     })
                     .collect()
             })?;
@@ -361,18 +405,18 @@ impl<'a> ToSql for PgValue<'a> {
             }
             Value::Json(ref v) => v.to_sql(ty, out),
             Value::Point(ref v) => v.to_sql(ty, out),
-            Value::Array(ref v) => match *v {
-                Array::Text(ref av) => av.to_sql(ty, out),
-                Array::Int(ref av) => av.to_sql(ty, out),
-                Array::Float(ref av) => av.to_sql(ty, out),
-            },
+            Value::Array(ref v) => {
+                match *v {
+                    Array::Text(ref av) => av.to_sql(ty, out),
+                    Array::Int(ref av) => av.to_sql(ty, out),
+                    Array::Float(ref av) => av.to_sql(ty, out),
+                }
+            }
             Value::Nil => Ok(IsNull::Yes),
         }
     }
 
-    fn accepts(_ty: &Type) -> bool {
-        true
-    }
+    fn accepts(_ty: &Type) -> bool { true }
 }
 
 impl<'b> FromSql<'b> for OwnedPgValue {
@@ -388,19 +432,27 @@ impl<'b> FromSql<'b> for OwnedPgValue {
             Kind::Array(ref array_type) => {
                 let array_type_kind = array_type.kind();
                 match *array_type_kind {
-                    Kind::Enum(_) => FromSql::from_sql(ty, raw)
-                        .map(|v| OwnedPgValue(Value::Array(Array::Text(v)))),
-                    _ => match *ty {
-                        Type::TEXT_ARRAY | Type::NAME_ARRAY | Type::VARCHAR_ARRAY => {
-                            FromSql::from_sql(ty, raw)
-                                .map(|v| OwnedPgValue(Value::Array(Array::Text(v))))
+                    Kind::Enum(_) => {
+                        FromSql::from_sql(ty, raw)
+                            .map(|v| OwnedPgValue(Value::Array(Array::Text(v))))
+                    }
+                    _ => {
+                        match *ty {
+                            Type::TEXT_ARRAY | Type::NAME_ARRAY | Type::VARCHAR_ARRAY => {
+                                FromSql::from_sql(ty, raw)
+                                    .map(|v| OwnedPgValue(Value::Array(Array::Text(v))))
+                            }
+                            Type::INT4_ARRAY => {
+                                FromSql::from_sql(ty, raw)
+                                    .map(|v| OwnedPgValue(Value::Array(Array::Int(v))))
+                            }
+                            Type::FLOAT4_ARRAY => {
+                                FromSql::from_sql(ty, raw)
+                                    .map(|v| OwnedPgValue(Value::Array(Array::Float(v))))
+                            }
+                            _ => panic!("Array type {:?} is not yet covered", array_type),
                         }
-                        Type::INT4_ARRAY => FromSql::from_sql(ty, raw)
-                            .map(|v| OwnedPgValue(Value::Array(Array::Int(v)))),
-                        Type::FLOAT4_ARRAY => FromSql::from_sql(ty, raw)
-                            .map(|v| OwnedPgValue(Value::Array(Array::Float(v)))),
-                        _ => panic!("Array type {:?} is not yet covered", array_type),
-                    },
+                    }
                 }
             }
             Kind::Simple => {
@@ -478,9 +530,7 @@ impl<'b> FromSql<'b> for OwnedPgValue {
         }
     }
 
-    fn accepts(_ty: &Type) -> bool {
-        true
-    }
+    fn accepts(_ty: &Type) -> bool { true }
 
     fn from_sql_null(_ty: &Type) -> Result<Self, Box<dyn Error + Sync + Send>> {
         Ok(OwnedPgValue(Value::Nil))
@@ -505,15 +555,17 @@ pub enum PostgresError {
 }
 
 impl fmt::Display for PostgresError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:#?}", self)
-    }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { write!(f, "{:#?}", self) }
 }
 
 #[cfg(test)]
 mod test {
 
-    use crate::{pool::*, Pool, *};
+    use crate::{
+        pool::*,
+        Pool,
+        *,
+    };
     use log::*;
     use std::ops::DerefMut;
 

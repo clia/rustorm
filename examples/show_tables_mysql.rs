@@ -1,4 +1,8 @@
-use rustorm::{DbError, Pool, Rows};
+use rustorm::{
+    DbError,
+    Pool,
+    Rows,
+};
 
 fn main() {
     let db_url = "mysql://root:r00t@localhost/sakila";

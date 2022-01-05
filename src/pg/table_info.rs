@@ -2,8 +2,22 @@
 //! This is not using information_schema since there is a performance issue with it.
 use crate::{
     pg::column_info,
-    table::{self, ForeignKey, Key, SchemaContent, TableDef, TableKey},
-    ColumnDef, ColumnName, DataError, Database, DbError, FromDao, TableName, Value,
+    table::{
+        self,
+        ForeignKey,
+        Key,
+        SchemaContent,
+        TableDef,
+        TableKey,
+    },
+    ColumnDef,
+    ColumnName,
+    DataError,
+    Database,
+    DbError,
+    FromDao,
+    TableName,
+    Value,
 };
 use log::*;
 use rustorm_dao::value::ToValue;
@@ -111,13 +125,10 @@ fn get_schema_tables(
     ORDER BY relname
             "#;
     let tablenames_simple: Result<Vec<TableNameSimple>, DbError> = db
-        .execute_sql_with_return(
-            sql,
-            &[
-                &Value::Text(schema.to_string()),
-                &Value::Char(kind.to_sql_char()),
-            ],
-        )
+        .execute_sql_with_return(sql, &[
+            &Value::Text(schema.to_string()),
+            &Value::Char(kind.to_sql_char()),
+        ])
         .map(|rows| {
             rows.iter()
                 .map(|row| {
@@ -228,20 +239,19 @@ pub fn get_table(
     };
 
     let mut table_simples: Vec<TableSimple> = db
-        .execute_sql_with_return(
-            sql,
-            &[
-                &Value::Text(table_name.name.to_string()),
-                &Value::Text(schema),
-            ],
-        )
+        .execute_sql_with_return(sql, &[
+            &Value::Text(table_name.name.to_string()),
+            &Value::Text(schema),
+        ])
         .map(|rows| {
             rows.iter()
-                .map(|row| TableSimple {
-                    name: row.get("name").expect("must have a table name"),
-                    schema: row.get("schema").expect("must have a schema"),
-                    comment: row.get_opt("comment").expect("must not error"),
-                    is_view: row.get("is_view").expect("must have is_view"),
+                .map(|row| {
+                    TableSimple {
+                        name: row.get("name").expect("must have a table name"),
+                        schema: row.get("schema").expect("must have a schema"),
+                        comment: row.get_opt("comment").expect("must not error"),
+                        is_view: row.get("is_view").expect("must have is_view"),
+                    }
                 })
                 .collect()
         })?;
@@ -300,18 +310,17 @@ fn get_columnname_from_key(
     };
 
     let column_name_simple: Result<Vec<ColumnNameSimple>, DbError> = db
-        .execute_sql_with_return(
-            sql,
-            &[
-                &key_name.to_value(),
-                &table_name.name.to_value(),
-                &schema.to_value(),
-            ],
-        )
+        .execute_sql_with_return(sql, &[
+            &key_name.to_value(),
+            &table_name.name.to_value(),
+            &schema.to_value(),
+        ])
         .map(|rows| {
             rows.iter()
-                .map(|row| ColumnNameSimple {
-                    column: row.get("column").expect("a column"),
+                .map(|row| {
+                    ColumnNameSimple {
+                        column: row.get("column").expect("a column"),
+                    }
                 })
                 .collect()
         });
@@ -390,11 +399,13 @@ fn get_table_key(db: &mut dyn Database, table_name: &TableName) -> Result<Vec<Ta
         .execute_sql_with_return(sql, &[&table_name.name.to_value(), &schema.to_value()])
         .map(|rows| {
             rows.iter()
-                .map(|row| TableKeySimple {
-                    key_name: row.get("key_name").expect("a key_name"),
-                    is_primary_key: row.get("is_primary_key").expect("is_primary_key"),
-                    is_unique_key: row.get("is_unique_key").expect("is_unique_key"),
-                    is_foreign_key: row.get("is_foreign_key").expect("is_foreign_key"),
+                .map(|row| {
+                    TableKeySimple {
+                        key_name: row.get("key_name").expect("a key_name"),
+                        is_primary_key: row.get("is_primary_key").expect("is_primary_key"),
+                        is_unique_key: row.get("is_unique_key").expect("is_unique_key"),
+                        is_foreign_key: row.get("is_foreign_key").expect("is_foreign_key"),
+                    }
                 })
                 .collect()
         });
@@ -454,10 +465,12 @@ fn get_foreign_key(
         .execute_sql_with_return(sql, &[&foreign_key.to_value()])
         .map(|rows| {
             rows.iter()
-                .map(|row| ForeignKeySimple {
-                    key_name: row.get("key_name").expect("key_name"),
-                    foreign_table: row.get("foreign_table").expect("foreign_table"),
-                    foreign_schema: row.get_opt("foreign_schema").expect("foreign_schema"),
+                .map(|row| {
+                    ForeignKeySimple {
+                        key_name: row.get("key_name").expect("key_name"),
+                        foreign_table: row.get("foreign_table").expect("foreign_table"),
+                        foreign_schema: row.get_opt("foreign_schema").expect("foreign_schema"),
+                    }
                 })
                 .collect()
         });
@@ -493,8 +506,10 @@ fn get_referred_foreign_columns(
         .execute_sql_with_return(sql, &[&foreign_key.to_value()])
         .map(|rows| {
             rows.iter()
-                .map(|row| ColumnNameSimple {
-                    column: row.get("column").expect("a column"),
+                .map(|row| {
+                    ColumnNameSimple {
+                        column: row.get("column").expect("a column"),
+                    }
                 })
                 .collect()
         });
@@ -514,7 +529,11 @@ fn get_referred_foreign_columns(
 #[cfg(test)]
 mod test {
 
-    use crate::{pg::table_info::*, Pool, TableName};
+    use crate::{
+        pg::table_info::*,
+        Pool,
+        TableName,
+    };
 
     #[test]
     fn all_schemas() {
@@ -557,17 +576,14 @@ mod test {
 
         info!("table: {:#?}", table);
 
-        assert_eq!(
-            table.table_key,
-            vec![TableKey::PrimaryKey(Key {
-                name: Some("actor_pkey".to_string()),
-                columns: vec![ColumnName {
-                    name: "actor_id".to_string(),
-                    table: None,
-                    alias: None,
-                }],
-            })]
-        );
+        assert_eq!(table.table_key, vec![TableKey::PrimaryKey(Key {
+            name: Some("actor_pkey".to_string()),
+            columns: vec![ColumnName {
+                name: "actor_id".to_string(),
+                table: None,
+                alias: None,
+            }],
+        })]);
     }
 
     #[test]
@@ -582,55 +598,52 @@ mod test {
             .expect("must be ok")
             .expect("must have a value");
 
-        assert_eq!(
-            table.table_key,
-            vec![
-                TableKey::PrimaryKey(Key {
-                    name: Some("store_pkey".into()),
-                    columns: vec![ColumnName {
-                        name: "store_id".into(),
-                        table: None,
-                        alias: None,
-                    }],
-                }),
-                TableKey::ForeignKey(ForeignKey {
-                    name: Some("store_address_id_fkey".into()),
-                    columns: vec![ColumnName {
-                        name: "address_id".into(),
-                        table: None,
-                        alias: None,
-                    }],
-                    foreign_table: TableName {
-                        name: "address".into(),
-                        schema: Some("public".into()),
-                        alias: None,
-                    },
-                    referred_columns: vec![ColumnName {
-                        name: "address_id".into(),
-                        table: None,
-                        alias: None,
-                    }],
-                }),
-                TableKey::ForeignKey(ForeignKey {
-                    name: Some("store_manager_staff_id_fkey".into()),
-                    columns: vec![ColumnName {
-                        name: "manager_staff_id".into(),
-                        table: None,
-                        alias: None,
-                    }],
-                    foreign_table: TableName {
-                        name: "staff".into(),
-                        schema: Some("public".into()),
-                        alias: None,
-                    },
-                    referred_columns: vec![ColumnName {
-                        name: "staff_id".into(),
-                        table: None,
-                        alias: None,
-                    }],
-                }),
-            ]
-        );
+        assert_eq!(table.table_key, vec![
+            TableKey::PrimaryKey(Key {
+                name: Some("store_pkey".into()),
+                columns: vec![ColumnName {
+                    name: "store_id".into(),
+                    table: None,
+                    alias: None,
+                }],
+            }),
+            TableKey::ForeignKey(ForeignKey {
+                name: Some("store_address_id_fkey".into()),
+                columns: vec![ColumnName {
+                    name: "address_id".into(),
+                    table: None,
+                    alias: None,
+                }],
+                foreign_table: TableName {
+                    name: "address".into(),
+                    schema: Some("public".into()),
+                    alias: None,
+                },
+                referred_columns: vec![ColumnName {
+                    name: "address_id".into(),
+                    table: None,
+                    alias: None,
+                }],
+            }),
+            TableKey::ForeignKey(ForeignKey {
+                name: Some("store_manager_staff_id_fkey".into()),
+                columns: vec![ColumnName {
+                    name: "manager_staff_id".into(),
+                    table: None,
+                    alias: None,
+                }],
+                foreign_table: TableName {
+                    name: "staff".into(),
+                    schema: Some("public".into()),
+                    alias: None,
+                },
+                referred_columns: vec![ColumnName {
+                    name: "staff_id".into(),
+                    table: None,
+                    alias: None,
+                }],
+            }),
+        ]);
     }
 
     #[test]
@@ -646,62 +659,59 @@ mod test {
             .expect("must have a value");
         info!("table: {:#?}", table);
 
-        assert_eq!(
-            table.table_key,
-            vec![
-                TableKey::PrimaryKey(Key {
-                    name: Some("film_actor_pkey".into()),
-                    columns: vec![
-                        ColumnName {
-                            name: "actor_id".into(),
-                            table: None,
-                            alias: None,
-                        },
-                        ColumnName {
-                            name: "film_id".into(),
-                            table: None,
-                            alias: None,
-                        },
-                    ],
-                }),
-                TableKey::ForeignKey(ForeignKey {
-                    name: Some("film_actor_actor_id_fkey".into()),
-                    columns: vec![ColumnName {
+        assert_eq!(table.table_key, vec![
+            TableKey::PrimaryKey(Key {
+                name: Some("film_actor_pkey".into()),
+                columns: vec![
+                    ColumnName {
                         name: "actor_id".into(),
                         table: None,
                         alias: None,
-                    }],
-                    foreign_table: TableName {
-                        name: "actor".into(),
-                        schema: Some("public".into()),
-                        alias: None,
                     },
-                    referred_columns: vec![ColumnName {
-                        name: "actor_id".into(),
-                        table: None,
-                        alias: None,
-                    }],
-                }),
-                TableKey::ForeignKey(ForeignKey {
-                    name: Some("film_actor_film_id_fkey".into()),
-                    columns: vec![ColumnName {
+                    ColumnName {
                         name: "film_id".into(),
                         table: None,
                         alias: None,
-                    }],
-                    foreign_table: TableName {
-                        name: "film".into(),
-                        schema: Some("public".into()),
-                        alias: None,
                     },
-                    referred_columns: vec![ColumnName {
-                        name: "film_id".into(),
-                        table: None,
-                        alias: None,
-                    }],
-                }),
-            ]
-        );
+                ],
+            }),
+            TableKey::ForeignKey(ForeignKey {
+                name: Some("film_actor_actor_id_fkey".into()),
+                columns: vec![ColumnName {
+                    name: "actor_id".into(),
+                    table: None,
+                    alias: None,
+                }],
+                foreign_table: TableName {
+                    name: "actor".into(),
+                    schema: Some("public".into()),
+                    alias: None,
+                },
+                referred_columns: vec![ColumnName {
+                    name: "actor_id".into(),
+                    table: None,
+                    alias: None,
+                }],
+            }),
+            TableKey::ForeignKey(ForeignKey {
+                name: Some("film_actor_film_id_fkey".into()),
+                columns: vec![ColumnName {
+                    name: "film_id".into(),
+                    table: None,
+                    alias: None,
+                }],
+                foreign_table: TableName {
+                    name: "film".into(),
+                    schema: Some("public".into()),
+                    alias: None,
+                },
+                referred_columns: vec![ColumnName {
+                    name: "film_id".into(),
+                    table: None,
+                    alias: None,
+                }],
+            }),
+        ]);
     }
 
     #[test]
@@ -716,63 +726,60 @@ mod test {
             .expect("must be ok")
             .expect("must have a value");
         info!("table: {:#?}", table);
-        assert_eq!(
-            table.table_key,
-            vec![
-                TableKey::PrimaryKey(Key {
-                    name: Some("film_actor_awards_pkey".into()),
-                    columns: vec![
-                        ColumnName {
-                            name: "actor_id".into(),
-                            table: None,
-                            alias: None,
-                        },
-                        ColumnName {
-                            name: "film_id".into(),
-                            table: None,
-                            alias: None,
-                        },
-                        ColumnName {
-                            name: "award".into(),
-                            table: None,
-                            alias: None,
-                        },
-                    ],
-                }),
-                TableKey::ForeignKey(ForeignKey {
-                    name: Some("film_actor_awards_actor_id_film_id_fkey".into()),
-                    columns: vec![
-                        ColumnName {
-                            name: "actor_id".into(),
-                            table: None,
-                            alias: None,
-                        },
-                        ColumnName {
-                            name: "film_id".into(),
-                            table: None,
-                            alias: None,
-                        },
-                    ],
-                    foreign_table: TableName {
-                        name: "film_actor".into(),
-                        schema: Some("public".into()),
+        assert_eq!(table.table_key, vec![
+            TableKey::PrimaryKey(Key {
+                name: Some("film_actor_awards_pkey".into()),
+                columns: vec![
+                    ColumnName {
+                        name: "actor_id".into(),
+                        table: None,
                         alias: None,
                     },
-                    referred_columns: vec![
-                        ColumnName {
-                            name: "actor_id".into(),
-                            table: None,
-                            alias: None,
-                        },
-                        ColumnName {
-                            name: "film_id".into(),
-                            table: None,
-                            alias: None,
-                        },
-                    ],
-                }),
-            ]
-        );
+                    ColumnName {
+                        name: "film_id".into(),
+                        table: None,
+                        alias: None,
+                    },
+                    ColumnName {
+                        name: "award".into(),
+                        table: None,
+                        alias: None,
+                    },
+                ],
+            }),
+            TableKey::ForeignKey(ForeignKey {
+                name: Some("film_actor_awards_actor_id_film_id_fkey".into()),
+                columns: vec![
+                    ColumnName {
+                        name: "actor_id".into(),
+                        table: None,
+                        alias: None,
+                    },
+                    ColumnName {
+                        name: "film_id".into(),
+                        table: None,
+                        alias: None,
+                    },
+                ],
+                foreign_table: TableName {
+                    name: "film_actor".into(),
+                    schema: Some("public".into()),
+                    alias: None,
+                },
+                referred_columns: vec![
+                    ColumnName {
+                        name: "actor_id".into(),
+                        table: None,
+                        alias: None,
+                    },
+                    ColumnName {
+                        name: "film_id".into(),
+                        table: None,
+                        alias: None,
+                    },
+                ],
+            }),
+        ]);
     }
 
     #[test]

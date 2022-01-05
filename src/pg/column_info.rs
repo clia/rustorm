@@ -1,8 +1,20 @@
 use crate::{
-    column::{Capacity, ColumnConstraint, ColumnSpecification, ColumnStat, Literal},
+    column::{
+        Capacity,
+        ColumnConstraint,
+        ColumnSpecification,
+        ColumnStat,
+        Literal,
+    },
     common,
     types::SqlType,
-    util, ColumnDef, ColumnName, Database, DbError, TableName, ToValue,
+    util,
+    ColumnDef,
+    ColumnName,
+    Database,
+    DbError,
+    TableName,
+    ToValue,
 };
 use log::*;
 use uuid::Uuid;
@@ -60,19 +72,18 @@ pub fn get_columns(
         None => "public".to_string(),
     };
     let columns_simple: Result<Vec<ColumnSimple>, DbError> = db
-        .execute_sql_with_return(
-            sql,
-            &[
-                &table_name.name.to_value(),
-                &schema.to_value(),
-                &table_name.complete_name().to_value(),
-            ],
-        )
+        .execute_sql_with_return(sql, &[
+            &table_name.name.to_value(),
+            &schema.to_value(),
+            &table_name.complete_name().to_value(),
+        ])
         .map(|rows| {
             rows.iter()
-                .map(|row| ColumnSimple {
-                    name: row.get("name").expect("a name"),
-                    comment: row.get_opt("comment").expect("a comment"),
+                .map(|row| {
+                    ColumnSimple {
+                        name: row.get("name").expect("a name"),
+                        comment: row.get_opt("comment").expect("a comment"),
+                    }
                 })
                 .collect()
         });
@@ -277,12 +288,16 @@ fn get_column_specification(
                                     } else {
                                         let array: Vec<f64> = array_result
                                             .iter()
-                                            .map(|r| match r {
-                                                Ok(r) => *r,
-                                                Err(e) => panic!(
+                                            .map(|r| {
+                                                match r {
+                                                    Ok(r) => *r,
+                                                    Err(e) => {
+                                                        panic!(
                                                     "unable to parse float value: {:?}, Error:{:?}",
                                                     r, e
-                                                ),
+                                                )
+                                                    }
+                                                }
                                             })
                                             .collect();
                                         Literal::ArrayFloat(array)
@@ -303,20 +318,24 @@ fn get_column_specification(
                                         .collect();
                                     Literal::ArrayString(trimmed_values)
                                 }
-                                _ => panic!(
-                                    "ArrayType not convered: {:?} in {}.{}",
-                                    sql_type,
-                                    table_name.complete_name(),
-                                    column_name
-                                ),
+                                _ => {
+                                    panic!(
+                                        "ArrayType not convered: {:?} in {}.{}",
+                                        sql_type,
+                                        table_name.complete_name(),
+                                        column_name
+                                    )
+                                }
                             }
                         }
-                        _ => panic!(
-                            "not convered: {:?} in {}.{}",
-                            sql_type,
-                            table_name.complete_name(),
-                            column_name
-                        ),
+                        _ => {
+                            panic!(
+                                "not convered: {:?} in {}.{}",
+                                sql_type,
+                                table_name.complete_name(),
+                                column_name
+                            )
+                        }
                     };
                     ColumnConstraint::DefaultValue(literal)
                 };
@@ -462,26 +481,25 @@ fn get_column_specification(
     };
     //info!("sql: {} column_name: {}, table_name: {}", sql, column_name, table_name.name);
     let mut column_constraints: Vec<ColumnConstraintSimple> = db
-        .execute_sql_with_return(
-            sql,
-            &[
-                &column_name.to_value(),
-                &table_name.name.to_value(),
-                &schema.to_value(),
-            ],
-        )
+        .execute_sql_with_return(sql, &[
+            &column_name.to_value(),
+            &table_name.name.to_value(),
+            &schema.to_value(),
+        ])
         .map(|rows| {
             rows.iter()
-                .map(|row| ColumnConstraintSimple {
-                    not_null: row.get("not_null").expect("a not_null"),
-                    data_type: row.get("data_type").expect("a data_type"),
-                    default: row.get_opt("default").expect("a default"),
-                    is_enum: row.get("is_enum").expect("a is_enum"),
-                    is_array_enum: row.get("is_array_enum").expect("a is_array_enum"),
-                    enum_choices: row.get("enum_choices").expect("enum_choices"),
-                    array_enum_choices: row
-                        .get("array_enum_choices")
-                        .expect("array of enum choices"),
+                .map(|row| {
+                    ColumnConstraintSimple {
+                        not_null: row.get("not_null").expect("a not_null"),
+                        data_type: row.get("data_type").expect("a data_type"),
+                        default: row.get_opt("default").expect("a default"),
+                        is_enum: row.get("is_enum").expect("a is_enum"),
+                        is_array_enum: row.get("is_array_enum").expect("a is_array_enum"),
+                        enum_choices: row.get("enum_choices").expect("enum_choices"),
+                        array_enum_choices: row
+                            .get("array_enum_choices")
+                            .expect("array of enum choices"),
+                    }
                 })
                 .collect()
         })?;
@@ -509,19 +527,18 @@ fn get_column_stat(
         None => "public".to_string(),
     };
     let mut column_stat: Vec<ColumnStat> = db
-        .execute_sql_with_return(
-            sql,
-            &[
-                &column_name.to_value(),
-                &table_name.name.to_value(),
-                &schema.to_value(),
-            ],
-        )
+        .execute_sql_with_return(sql, &[
+            &column_name.to_value(),
+            &table_name.name.to_value(),
+            &schema.to_value(),
+        ])
         .map(|rows| {
             rows.iter()
-                .map(|row| ColumnStat {
-                    avg_width: row.get("avg_width").expect("avg_width"),
-                    n_distinct: row.get("n_distinct").expect("n_distinct"),
+                .map(|row| {
+                    ColumnStat {
+                        avg_width: row.get("avg_width").expect("avg_width"),
+                        n_distinct: row.get("n_distinct").expect("n_distinct"),
+                    }
                 })
                 .collect()
         })?;
@@ -535,7 +552,11 @@ fn get_column_stat(
 #[cfg(test)]
 mod test {
 
-    use crate::{column::*, pg::column_info::*, *};
+    use crate::{
+        column::*,
+        pg::column_info::*,
+        *,
+    };
     use chrono::*;
 
     #[test]
@@ -593,25 +614,19 @@ mod test {
         info!("specification: {:#?}", specification);
         assert!(specification.is_ok());
         let specification = specification.unwrap();
-        assert_eq!(
-            specification,
-            ColumnSpecification {
-                sql_type: SqlType::Enum(
-                    "mpaa_rating".into(),
-                    vec![
-                        "G".into(),
-                        "PG".into(),
-                        "PG-13".into(),
-                        "R".into(),
-                        "NC-17".into(),
-                    ]
-                ),
-                capacity: None,
-                constraints: vec![ColumnConstraint::DefaultValue(Literal::String(
-                    "'G'".into(),
-                ))],
-            }
-        );
+        assert_eq!(specification, ColumnSpecification {
+            sql_type: SqlType::Enum("mpaa_rating".into(), vec![
+                "G".into(),
+                "PG".into(),
+                "PG-13".into(),
+                "R".into(),
+                "NC-17".into(),
+            ]),
+            capacity: None,
+            constraints: vec![ColumnConstraint::DefaultValue(Literal::String(
+                "'G'".into(),
+            ))],
+        });
     }
 
     #[test]
@@ -627,14 +642,11 @@ mod test {
         info!("specification: {:#?}", specification);
         assert!(specification.is_ok());
         let specification = specification.unwrap();
-        assert_eq!(
-            specification,
-            ColumnSpecification {
-                sql_type: SqlType::Smallint,
-                capacity: None,
-                constraints: vec![],
-            }
-        );
+        assert_eq!(specification, ColumnSpecification {
+            sql_type: SqlType::Smallint,
+            capacity: None,
+            constraints: vec![],
+        });
     }
 
     #[test]
@@ -650,17 +662,14 @@ mod test {
         info!("specification: {:#?}", specification);
         assert!(specification.is_ok());
         let specification = specification.unwrap();
-        assert_eq!(
-            specification,
-            ColumnSpecification {
-                sql_type: SqlType::Int,
-                capacity: None,
-                constraints: vec![
-                    ColumnConstraint::NotNull,
-                    ColumnConstraint::AutoIncrement(Some("actor_actor_id_seq".to_string()))
-                ],
-            }
-        );
+        assert_eq!(specification, ColumnSpecification {
+            sql_type: SqlType::Int,
+            capacity: None,
+            constraints: vec![
+                ColumnConstraint::NotNull,
+                ColumnConstraint::AutoIncrement(Some("actor_actor_id_seq".to_string()))
+            ],
+        });
     }
     #[test]
     fn column_specification_for_actor_last_updated() {
@@ -675,17 +684,14 @@ mod test {
         info!("specification: {:#?}", specification);
         assert!(specification.is_ok());
         let specification = specification.unwrap();
-        assert_eq!(
-            specification,
-            ColumnSpecification {
-                sql_type: SqlType::Timestamp,
-                capacity: None,
-                constraints: vec![
-                    ColumnConstraint::NotNull,
-                    ColumnConstraint::DefaultValue(Literal::CurrentTimestamp),
-                ],
-            }
-        );
+        assert_eq!(specification, ColumnSpecification {
+            sql_type: SqlType::Timestamp,
+            capacity: None,
+            constraints: vec![
+                ColumnConstraint::NotNull,
+                ColumnConstraint::DefaultValue(Literal::CurrentTimestamp),
+            ],
+        });
     }
 
     #[test]
@@ -701,22 +707,16 @@ mod test {
         assert!(columns.is_ok());
         let columns = columns.unwrap();
         assert_eq!(columns.len(), 4);
-        assert_eq!(
-            columns[1].name,
-            ColumnName {
-                name: "first_name".to_string(),
-                table: None,
-                alias: None,
-            }
-        );
-        assert_eq!(
-            columns[1].specification,
-            ColumnSpecification {
-                sql_type: SqlType::Varchar,
-                capacity: Some(Capacity::Limit(45)),
-                constraints: vec![ColumnConstraint::NotNull],
-            }
-        );
+        assert_eq!(columns[1].name, ColumnName {
+            name: "first_name".to_string(),
+            table: None,
+            alias: None,
+        });
+        assert_eq!(columns[1].specification, ColumnSpecification {
+            sql_type: SqlType::Varchar,
+            capacity: Some(Capacity::Limit(45)),
+            constraints: vec![ColumnConstraint::NotNull],
+        });
     }
 
     #[test]
@@ -733,16 +733,13 @@ mod test {
         let columns = columns.unwrap();
         assert_eq!(columns.len(), 14);
         assert_eq!(columns[7].name, ColumnName::from("rental_rate"));
-        assert_eq!(
-            columns[7].specification,
-            ColumnSpecification {
-                sql_type: SqlType::Numeric,
-                capacity: Some(Capacity::Range(4, 2)),
-                constraints: vec![
-                    ColumnConstraint::NotNull,
-                    ColumnConstraint::DefaultValue(Literal::Double(4.99)),
-                ],
-            }
-        );
+        assert_eq!(columns[7].specification, ColumnSpecification {
+            sql_type: SqlType::Numeric,
+            capacity: Some(Capacity::Range(4, 2)),
+            constraints: vec![
+                ColumnConstraint::NotNull,
+                ColumnConstraint::DefaultValue(Literal::Double(4.99)),
+            ],
+        });
     }
 }

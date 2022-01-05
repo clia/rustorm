@@ -1,4 +1,9 @@
-use crate::{types::SqlType, ColumnDef, ColumnName, TableName};
+use crate::{
+    types::SqlType,
+    ColumnDef,
+    ColumnName,
+    TableName,
+};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct TableDef {
@@ -17,17 +22,11 @@ pub struct TableDef {
 }
 
 impl TableDef {
-    pub fn complete_name(&self) -> String {
-        self.name.complete_name()
-    }
+    pub fn complete_name(&self) -> String { self.name.complete_name() }
 
-    pub fn safe_name(&self) -> String {
-        self.name.safe_name()
-    }
+    pub fn safe_name(&self) -> String { self.name.safe_name() }
 
-    pub fn safe_complete_name(&self) -> String {
-        self.name.safe_complete_name()
-    }
+    pub fn safe_complete_name(&self) -> String { self.name.safe_complete_name() }
 
     pub fn get_primary_column_names(&self) -> Vec<&ColumnName> {
         let mut primary: Vec<&ColumnName> = vec![];
@@ -222,7 +221,10 @@ pub struct SchemaContent {
 #[cfg(test)]
 #[cfg(feature = "with-postgres")]
 mod test {
-    use crate::{table::*, *};
+    use crate::{
+        table::*,
+        *,
+    };
     use log::*;
 
     #[test]
@@ -249,13 +251,10 @@ mod test {
         println!("table: {:#?}", table);
         let foreign_tables = table.get_foreign_tables();
         println!("foreign_tables: {:#?}", foreign_tables);
-        assert_eq!(
-            foreign_tables,
-            vec![
-                &TableName::from("public.actor"),
-                &TableName::from("public.film"),
-            ]
-        );
+        assert_eq!(foreign_tables, vec![
+            &TableName::from("public.actor"),
+            &TableName::from("public.film"),
+        ]);
     }
 
     #[test]

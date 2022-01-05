@@ -1,5 +1,11 @@
-use rustorm_dao::{value::Array, Value};
-use serde::{Deserialize, Serialize};
+use rustorm_dao::{
+    value::Array,
+    Value,
+};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum SqlType {
@@ -47,9 +53,7 @@ pub enum SqlType {
 }
 
 impl SqlType {
-    pub fn is_array_type(&self) -> bool {
-        matches!(*self, SqlType::Array(_))
-    }
+    pub fn is_array_type(&self) -> bool { matches!(*self, SqlType::Array(_)) }
 
     pub fn is_integer_type(&self) -> bool {
         matches!(
@@ -76,10 +80,12 @@ impl SqlType {
         match *self {
             SqlType::Text => "text".into(),
             SqlType::TsVector => "tsvector".into(),
-            SqlType::Array(ref ty) => match ty.as_ref() {
-                SqlType::Text => "text[]".into(),
-                _ => panic!("not yet dealt {:?}", self),
-            },
+            SqlType::Array(ref ty) => {
+                match ty.as_ref() {
+                    SqlType::Text => "text[]".into(),
+                    _ => panic!("not yet dealt {:?}", self),
+                }
+            }
             _ => panic!("not yet dealt {:?}", self),
         }
     }

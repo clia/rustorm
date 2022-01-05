@@ -1,15 +1,37 @@
 #[cfg(feature = "db-auth")]
-use crate::db_auth::{Role, User};
+use crate::db_auth::{
+    Role,
+    User,
+};
 use crate::{
-    column, common, table::SchemaContent, types::SqlType, ColumnDef, ColumnName, DataError,
-    Database, DatabaseName, DbError, FromDao, TableDef, TableName, ToValue, Value,
+    column,
+    common,
+    table::SchemaContent,
+    types::SqlType,
+    ColumnDef,
+    ColumnName,
+    DataError,
+    Database,
+    DatabaseName,
+    DbError,
+    FromDao,
+    TableDef,
+    TableName,
+    ToValue,
+    Value,
 };
 use r2d2::ManageConnection;
 use r2d2_mysql::{
     self,
-    mysql::{self, prelude::Queryable},
+    mysql::{
+        self,
+        prelude::Queryable,
+    },
 };
-use rustorm_dao::{FromDao, Rows};
+use rustorm_dao::{
+    FromDao,
+    Rows,
+};
 use thiserror::Error;
 
 pub fn init_pool(
@@ -249,8 +271,10 @@ impl Database for MysqlDB {
         let result: Vec<TableNameSimple> = self
             .execute_sql_with_return(sql, &[])?
             .iter()
-            .map(|row| TableNameSimple {
-                table_name: row.get("table_name").expect("must have a table name"),
+            .map(|row| {
+                TableNameSimple {
+                    table_name: row.get("table_name").expect("must have a table name"),
+                }
             })
             .collect();
         let tablenames = result
@@ -285,12 +309,12 @@ impl Database for MysqlDB {
             self.execute_sql_with_return(sql, &[]).map(|rows| {
                 rows.iter()
                     .map(|row| {
-                        row.get_opt("name")
-                            .expect("must not error")
-                            .map(|name| DatabaseName {
+                        row.get_opt("name").expect("must not error").map(|name| {
+                            DatabaseName {
                                 name,
                                 description: None,
-                            })
+                            }
+                        })
                     })
                     .collect()
             })?;
@@ -309,34 +333,32 @@ impl Database for MysqlDB {
 
         rows.map(|rows| {
             rows.iter()
-                .map(|row| User {
-                    //FIXME; this should be option
-                    sysid: 0,
-                    username: row.get("username").expect("username"),
-                    //TODO: join to the user_privileges tables
-                    is_superuser: false,
-                    is_inherit: false,
-                    can_create_db: false,
-                    can_create_role: false,
-                    can_login: false,
-                    can_do_replication: false,
-                    can_bypass_rls: false,
-                    valid_until: None,
-                    conn_limit: None,
+                .map(|row| {
+                    User {
+                        //FIXME; this should be option
+                        sysid: 0,
+                        username: row.get("username").expect("username"),
+                        //TODO: join to the user_privileges tables
+                        is_superuser: false,
+                        is_inherit: false,
+                        can_create_db: false,
+                        can_create_role: false,
+                        can_login: false,
+                        can_do_replication: false,
+                        can_bypass_rls: false,
+                        valid_until: None,
+                        conn_limit: None,
+                    }
                 })
                 .collect()
         })
     }
 
     #[cfg(feature = "db-auth")]
-    fn get_user_detail(&mut self, _username: &str) -> Result<Vec<User>, DbError> {
-        todo!()
-    }
+    fn get_user_detail(&mut self, _username: &str) -> Result<Vec<User>, DbError> { todo!() }
 
     #[cfg(feature = "db-auth")]
-    fn get_roles(&mut self, _username: &str) -> Result<Vec<Role>, DbError> {
-        todo!()
-    }
+    fn get_roles(&mut self, _username: &str) -> Result<Vec<Role>, DbError> { todo!() }
 
     fn set_autoincrement_value(
         &mut self,
@@ -363,8 +385,10 @@ fn get_table_names(db: &mut dyn Database, kind: &str) -> Result<Vec<TableName>, 
     let result: Vec<TableNameSimple> = db
         .execute_sql_with_return(sql, &[&kind.to_value()])?
         .iter()
-        .map(|row| TableNameSimple {
-            table_name: row.get("table_name").expect("must have a table name"),
+        .map(|row| {
+            TableNameSimple {
+                table_name: row.get("table_name").expect("must have a table name"),
+            }
         })
         .collect();
     let mut table_names = vec![];
@@ -409,7 +433,10 @@ fn into_record(
     mut row: mysql::Row,
     column_types: &[mysql::consts::ColumnType],
 ) -> Result<Vec<Value>, MysqlError> {
-    use mysql::{consts::ColumnType, from_value_opt as fvo};
+    use mysql::{
+        consts::ColumnType,
+        from_value_opt as fvo,
+    };
 
     column_types
         .iter()
@@ -425,12 +452,14 @@ fn into_record(
             }
 
             match column_type {
-                ColumnType::MYSQL_TYPE_DECIMAL | ColumnType::MYSQL_TYPE_NEWDECIMAL => fvo(cell)
-                    .and_then(|v: Vec<u8>| {
-                        bigdecimal::BigDecimal::parse_bytes(&v, 10)
-                            .ok_or(mysql::FromValueError(mysql::Value::Bytes(v)))
-                    })
-                    .map(Value::BigDecimal),
+                ColumnType::MYSQL_TYPE_DECIMAL | ColumnType::MYSQL_TYPE_NEWDECIMAL => {
+                    fvo(cell)
+                        .and_then(|v: Vec<u8>| {
+                            bigdecimal::BigDecimal::parse_bytes(&v, 10)
+                                .ok_or(mysql::FromValueError(mysql::Value::Bytes(v)))
+                        })
+                        .map(Value::BigDecimal)
+                }
                 ColumnType::MYSQL_TYPE_TINY => fvo(cell).map(Value::Tinyint),
                 ColumnType::MYSQL_TYPE_SHORT | ColumnType::MYSQL_TYPE_YEAR => {
                     fvo(cell).map(Value::Smallint)
@@ -442,9 +471,11 @@ fn into_record(
                 ColumnType::MYSQL_TYPE_FLOAT => fvo(cell).map(Value::Float),
                 ColumnType::MYSQL_TYPE_DOUBLE => fvo(cell).map(Value::Double),
                 ColumnType::MYSQL_TYPE_NULL => fvo(cell).map(|_: mysql::Value| Value::Nil),
-                ColumnType::MYSQL_TYPE_TIMESTAMP => fvo(cell).map(|v: chrono::NaiveDateTime| {
-                    Value::Timestamp(chrono::DateTime::from_utc(v, chrono::Utc))
-                }),
+                ColumnType::MYSQL_TYPE_TIMESTAMP => {
+                    fvo(cell).map(|v: chrono::NaiveDateTime| {
+                        Value::Timestamp(chrono::DateTime::from_utc(v, chrono::Utc))
+                    })
+                }
                 ColumnType::MYSQL_TYPE_DATE | ColumnType::MYSQL_TYPE_NEWDATE => {
                     fvo(cell).map(Value::Date)
                 }
@@ -492,7 +523,5 @@ pub enum MysqlError {
 }
 
 impl From<mysql::Error> for MysqlError {
-    fn from(e: mysql::Error) -> Self {
-        MysqlError::Sql(e, "Generic Error".into())
-    }
+    fn from(e: mysql::Error) -> Self { MysqlError::Sql(e, "Generic Error".into()) }
 }

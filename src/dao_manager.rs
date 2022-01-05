@@ -1,21 +1,22 @@
-use crate::{DBPlatform, Dao, DataError, DbError, Rows, Value};
+use crate::{
+    DBPlatform,
+    Dao,
+    DataError,
+    DbError,
+    Rows,
+    Value,
+};
 
 /// an interface executing sql statement and getting the results as generic DAO values
 /// without any further conversion.
 pub struct DaoManager(pub DBPlatform);
 
 impl DaoManager {
-    pub fn begin_transaction(&mut self) -> Result<(), DbError> {
-        self.0.begin_transaction()
-    }
+    pub fn begin_transaction(&mut self) -> Result<(), DbError> { self.0.begin_transaction() }
 
-    pub fn commit_transaction(&mut self) -> Result<(), DbError> {
-        self.0.commit_transaction()
-    }
+    pub fn commit_transaction(&mut self) -> Result<(), DbError> { self.0.commit_transaction() }
 
-    pub fn rollback_transaction(&mut self) -> Result<(), DbError> {
-        self.0.rollback_transaction()
-    }
+    pub fn rollback_transaction(&mut self) -> Result<(), DbError> { self.0.rollback_transaction() }
 
     pub fn execute_sql_with_return(
         &mut self,
@@ -44,10 +45,12 @@ impl DaoManager {
         let record: Result<Option<Dao>, DbError> =
             self.execute_sql_with_maybe_one_return(sql, params);
         match record {
-            Ok(record) => match record {
-                Some(record) => Ok(record),
-                None => Err(DbError::DataError(DataError::ZeroRecordReturned)),
-            },
+            Ok(record) => {
+                match record {
+                    Some(record) => Ok(record),
+                    None => Err(DbError::DataError(DataError::ZeroRecordReturned)),
+                }
+            }
             Err(e) => Err(e),
         }
     }
@@ -59,11 +62,13 @@ impl DaoManager {
     ) -> Result<Option<Dao>, DbError> {
         let result: Result<Vec<Dao>, DbError> = self.execute_sql_with_records_return(sql, params);
         match result {
-            Ok(mut result) => match result.len() {
-                0 => Ok(None),
-                1 => Ok(Some(result.remove(0))),
-                _ => Err(DbError::DataError(DataError::MoreThan1RecordReturned)),
-            },
+            Ok(mut result) => {
+                match result.len() {
+                    0 => Ok(None),
+                    1 => Ok(Some(result.remove(0))),
+                    _ => Err(DbError::DataError(DataError::MoreThan1RecordReturned)),
+                }
+            }
             Err(e) => Err(e),
         }
     }

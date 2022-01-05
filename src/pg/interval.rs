@@ -5,8 +5,14 @@
 /// representing number of months. This struct is a dumb wrapper type, meant only to indicate the
 /// meaning of these parts.
 ///
-use byteorder::{BigEndian, ReadBytesExt};
-use postgres::types::{FromSql, Type};
+use byteorder::{
+    BigEndian,
+    ReadBytesExt,
+};
+use postgres::types::{
+    FromSql,
+    Type,
+};
 use std::error::Error;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -35,19 +41,13 @@ impl PgInterval {
     }
 
     /// Equivalent to `new(microseconds, 0, 0)`
-    pub fn from_microseconds(microseconds: i64) -> Self {
-        Self::new(microseconds, 0, 0)
-    }
+    pub fn from_microseconds(microseconds: i64) -> Self { Self::new(microseconds, 0, 0) }
 
     /// Equivalent to `new(0, days, 0)`
-    pub fn from_days(days: i32) -> Self {
-        Self::new(0, days, 0)
-    }
+    pub fn from_days(days: i32) -> Self { Self::new(0, days, 0) }
 
     /// Equivalent to `new(0, 0, months)`
-    pub fn from_months(months: i32) -> Self {
-        Self::new(0, 0, months)
-    }
+    pub fn from_months(months: i32) -> Self { Self::new(0, 0, months) }
 
     /*
     /// rough microseconds
@@ -69,7 +69,5 @@ impl<'b> FromSql<'b> for PgInterval {
         Ok(PgInterval::new(ms, days, months))
     }
 
-    fn accepts(ty: &Type) -> bool {
-        matches!(*ty, Type::INTERVAL)
-    }
+    fn accepts(ty: &Type) -> bool { matches!(*ty, Type::INTERVAL) }
 }

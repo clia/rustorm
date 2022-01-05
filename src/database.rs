@@ -1,6 +1,16 @@
 #[cfg(feature = "db-auth")]
-use crate::db_auth::{Role, User};
-use crate::{table::SchemaContent, DbError, Rows, TableDef, TableName, Value};
+use crate::db_auth::{
+    Role,
+    User,
+};
+use crate::{
+    table::SchemaContent,
+    DbError,
+    Rows,
+    TableDef,
+    TableName,
+    Value,
+};
 use rustorm_codegen::FromDao;
 use serde::Serialize;
 

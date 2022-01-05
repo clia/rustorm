@@ -1,4 +1,8 @@
-use rustorm::{DbError, Pool, Rows};
+use rustorm::{
+    DbError,
+    Pool,
+    Rows,
+};
 
 /// Run using:
 /// ```

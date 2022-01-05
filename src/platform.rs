@@ -1,6 +1,12 @@
-use crate::{error::ParseError, Database};
+use crate::{
+    error::ParseError,
+    Database,
+};
 use cfg_if::cfg_if;
-use std::{convert::TryFrom, ops::Deref};
+use std::{
+    convert::TryFrom,
+    ops::Deref,
+};
 use url::Url;
 
 cfg_if! {if #[cfg(feature = "with-postgres")]{

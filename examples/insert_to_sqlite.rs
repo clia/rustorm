@@ -1,5 +1,17 @@
-use chrono::{NaiveDateTime, NaiveDate, NaiveTime};
-use rustorm::{DbError, FromDao, Pool, ToColumnNames, ToDao, ToTableName, Value};
+use chrono::{
+    NaiveDate,
+    NaiveDateTime,
+    NaiveTime,
+};
+use rustorm::{
+    DbError,
+    FromDao,
+    Pool,
+    ToColumnNames,
+    ToDao,
+    ToTableName,
+    Value,
+};
 
 fn main() {
     mod for_insert {
@@ -44,7 +56,7 @@ fn main() {
     let tom_cruise = for_insert::Actor {
         first_name: "TOM".into(),
         last_name: "CRUISE".to_string(),
-        somedate: NaiveDateTime::new(d,t),
+        somedate: NaiveDateTime::new(d, t),
     };
 
     let d = NaiveDate::from_ymd(2000, 10, 9);
@@ -52,7 +64,7 @@ fn main() {
     let tom_hanks = for_insert::Actor {
         first_name: "TOM".into(),
         last_name: "HANKS".to_string(),
-        somedate: NaiveDateTime::new(d,t),
+        somedate: NaiveDateTime::new(d, t),
     };
 
     let d = NaiveDate::from_ymd(2000, 10, 9);
@@ -60,7 +72,7 @@ fn main() {
     let tom_selleck = for_insert::Actor {
         first_name: "TOM".into(),
         last_name: "SELLECK".to_string(),
-        somedate: NaiveDateTime::new(d,t),
+        somedate: NaiveDateTime::new(d, t),
     };
     println!("tom_cruise: {:#?}", tom_cruise);
     println!("tom_hanks: {:#?}", tom_hanks);

@@ -1,15 +1,35 @@
 ///
 /// Copied from diesel
 ///
-use byteorder::{NetworkEndian, ReadBytesExt};
-use bytes::{BufMut, BytesMut};
+use byteorder::{
+    NetworkEndian,
+    ReadBytesExt,
+};
+use bytes::{
+    BufMut,
+    BytesMut,
+};
 use std::error::Error;
 
-use postgres::types::{to_sql_checked, FromSql, IsNull, ToSql, Type};
+use postgres::types::{
+    to_sql_checked,
+    FromSql,
+    IsNull,
+    ToSql,
+    Type,
+};
 
 use bigdecimal::{
-    num_bigint::{BigInt, BigUint, Sign},
-    num_traits::{Signed, ToPrimitive, Zero},
+    num_bigint::{
+        BigInt,
+        BigUint,
+        Sign,
+    },
+    num_traits::{
+        Signed,
+        ToPrimitive,
+        Zero,
+    },
     BigDecimal,
 };
 
@@ -40,9 +60,7 @@ impl ::std::fmt::Display for InvalidNumericSign {
 }
 
 impl Error for InvalidNumericSign {
-    fn description(&self) -> &str {
-        "sign for numeric field was not one of 0, 0x4000, 0xC000"
-    }
+    fn description(&self) -> &str { "sign for numeric field was not one of 0, 0x4000, 0xC000" }
 }
 
 impl<'b> FromSql<'b> for PgNumeric {
@@ -58,16 +76,20 @@ impl<'b> FromSql<'b> for PgNumeric {
         }
 
         match sign {
-            0 => Ok(PgNumeric::Positive {
-                weight,
-                scale,
-                digits,
-            }),
-            0x4000 => Ok(PgNumeric::Negative {
-                weight,
-                scale,
-                digits,
-            }),
+            0 => {
+                Ok(PgNumeric::Positive {
+                    weight,
+                    scale,
+                    digits,
+                })
+            }
+            0x4000 => {
+                Ok(PgNumeric::Negative {
+                    weight,
+                    scale,
+                    digits,
+                })
+            }
             0xC000 => Ok(PgNumeric::NaN),
             invalid => Err(Box::new(InvalidNumericSign(invalid))),
         }
@@ -120,9 +142,7 @@ impl ToSql for PgNumeric {
         Ok(IsNull::No)
     }
 
-    fn accepts(ty: &Type) -> bool {
-        matches!(*ty, Type::NUMERIC)
-    }
+    fn accepts(ty: &Type) -> bool { matches!(*ty, Type::NUMERIC) }
 }
 
 /// Iterator over the digits of a big uint in base 10k.
@@ -178,29 +198,33 @@ impl<'a> From<&'a BigDecimal> for PgNumeric {
         digits.truncate(relevant_digits);
 
         match decimal.sign() {
-            Sign::Plus => PgNumeric::Positive {
-                digits,
-                scale,
-                weight,
-            },
-            Sign::Minus => PgNumeric::Negative {
-                digits,
-                scale,
-                weight,
-            },
-            Sign::NoSign => PgNumeric::Positive {
-                digits: vec![0],
-                scale: 0,
-                weight: 0,
-            },
+            Sign::Plus => {
+                PgNumeric::Positive {
+                    digits,
+                    scale,
+                    weight,
+                }
+            }
+            Sign::Minus => {
+                PgNumeric::Negative {
+                    digits,
+                    scale,
+                    weight,
+                }
+            }
+            Sign::NoSign => {
+                PgNumeric::Positive {
+                    digits: vec![0],
+                    scale: 0,
+                    weight: 0,
+                }
+            }
         }
     }
 }
 
 impl From<BigDecimal> for PgNumeric {
-    fn from(bigdecimal: BigDecimal) -> Self {
-        (&bigdecimal).into()
-    }
+    fn from(bigdecimal: BigDecimal) -> Self { (&bigdecimal).into() }
 }
 
 impl From<PgNumeric> for BigDecimal {
