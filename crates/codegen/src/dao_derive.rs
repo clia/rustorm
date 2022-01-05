@@ -1,4 +1,7 @@
-use crate::util::find_crate_name;
+use crate::util::{
+    find_attribute_value,
+    find_crate_name,
+};
 use proc_macro2::TokenStream;
 use syn::{
     Data,
@@ -67,7 +70,9 @@ pub fn impl_to_dao(ast: &DeriveInput) -> TokenStream {
 
 fn parse_field(field: &Field) -> (Lit, &Ident) {
     let field_name = field.ident.as_ref().unwrap();
-    let column_name = LitStr::new(&field_name.to_string(), field_name.span()).into();
+    let column_name = find_attribute_value(&field.attrs, "column_name")
+        .unwrap_or_else(|| LitStr::new(&field_name.to_string(), field_name.span()))
+        .into();
 
     (column_name, field_name)
 }

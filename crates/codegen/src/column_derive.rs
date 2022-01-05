@@ -1,10 +1,14 @@
-use crate::util::find_crate_name;
+use crate::util::{
+    find_attribute_value,
+    find_crate_name,
+};
 use proc_macro2::TokenStream;
 use syn::{
     Data,
     DeriveInput,
     Field,
     Ident,
+    LitStr,
 };
 
 pub fn impl_to_column_names(ast: &DeriveInput) -> TokenStream {
@@ -35,11 +39,13 @@ pub fn impl_to_column_names(ast: &DeriveInput) -> TokenStream {
 }
 
 fn generate_from_field(rustorm: &TokenStream, table_name: &Ident, field: &Field) -> TokenStream {
-    let column_name = field.ident.as_ref().unwrap();
+    let field_name = field.ident.as_ref().unwrap();
+    let column_name = find_attribute_value(&field.attrs, "column_name")
+        .unwrap_or_else(|| LitStr::new(&field_name.to_string(), field_name.span()));
 
     quote! {
         #rustorm::ColumnName {
-            name: stringify!(#column_name).into(),
+            name: #column_name.into(),
             table: Some(stringify!(#table_name).to_lowercase().into()),
             alias: None,
         },
