@@ -8,7 +8,7 @@ use geo_types::Point;
 use log::*;
 use postgres::{
     self,
-    types::{self, to_sql_checked, FromSql, IsNull, Kind, ToSql, Type},
+    types::{to_sql_checked, FromSql, IsNull, Kind, ToSql, Type},
     NoTls,
 };
 use r2d2::{self, ManageConnection};
@@ -392,13 +392,13 @@ impl FromSql for OwnedPgValue {
                     Kind::Enum(_) => FromSql::from_sql(ty, raw)
                         .map(|v| OwnedPgValue(Value::Array(Array::Text(v)))),
                     _ => match *ty {
-                        types::TEXT_ARRAY | types::NAME_ARRAY | types::VARCHAR_ARRAY => {
+                        Type::TEXT_ARRAY | Type::NAME_ARRAY | Type::VARCHAR_ARRAY => {
                             FromSql::from_sql(ty, raw)
                                 .map(|v| OwnedPgValue(Value::Array(Array::Text(v))))
                         }
-                        types::INT4_ARRAY => FromSql::from_sql(ty, raw)
+                        Type::INT4_ARRAY => FromSql::from_sql(ty, raw)
                             .map(|v| OwnedPgValue(Value::Array(Array::Int(v)))),
-                        types::FLOAT4_ARRAY => FromSql::from_sql(ty, raw)
+                        Type::FLOAT4_ARRAY => FromSql::from_sql(ty, raw)
                             .map(|v| OwnedPgValue(Value::Array(Array::Float(v)))),
                         _ => panic!("Array type {:?} is not yet covered", array_type),
                     },
@@ -406,24 +406,24 @@ impl FromSql for OwnedPgValue {
             }
             Kind::Simple => {
                 match *ty {
-                    types::BOOL => match_type!(Bool),
-                    types::INT2 => match_type!(Smallint),
-                    types::INT4 => match_type!(Int),
-                    types::INT8 => match_type!(Bigint),
-                    types::FLOAT4 => match_type!(Float),
-                    types::FLOAT8 => match_type!(Double),
-                    types::TEXT | types::VARCHAR | types::NAME | types::UNKNOWN => {
+                    Type::BOOL => match_type!(Bool),
+                    Type::INT2 => match_type!(Smallint),
+                    Type::INT4 => match_type!(Int),
+                    Type::INT8 => match_type!(Bigint),
+                    Type::FLOAT4 => match_type!(Float),
+                    Type::FLOAT8 => match_type!(Double),
+                    Type::TEXT | Type::VARCHAR | Type::NAME | Type::UNKNOWN => {
                         match_type!(Text)
                     }
-                    types::TS_VECTOR => {
+                    Type::TS_VECTOR => {
                         let text = String::from_utf8(raw.to_owned());
                         match text {
                             Ok(text) => Ok(OwnedPgValue(Value::Text(text))),
                             Err(e) => Err(Box::new(PostgresError::Utf8(e))),
                         }
                     }
-                    types::BPCHAR => {
-                        let v: Result<String, _> = FromSql::from_sql(&types::TEXT, raw);
+                    Type::BPCHAR => {
+                        let v: Result<String, _> = FromSql::from_sql(&Type::TEXT, raw);
                         match v {
                             Ok(v) => {
                                 // TODO: Need to unify char and character array in one Value::Text
@@ -440,22 +440,22 @@ impl FromSql for OwnedPgValue {
                             Err(e) => Err(e),
                         }
                     }
-                    types::UUID => match_type!(Uuid),
-                    types::DATE => match_type!(Date),
-                    types::TIMESTAMPTZ | types::TIMESTAMP => match_type!(Timestamp),
-                    types::TIME | types::TIMETZ => match_type!(Time),
-                    types::BYTEA => match_type!(Blob),
-                    types::NUMERIC => {
+                    Type::UUID => match_type!(Uuid),
+                    Type::DATE => match_type!(Date),
+                    Type::TIMESTAMPTZ | Type::TIMESTAMP => match_type!(Timestamp),
+                    Type::TIME | Type::TIMETZ => match_type!(Time),
+                    Type::BYTEA => match_type!(Blob),
+                    Type::NUMERIC => {
                         let numeric: PgNumeric = FromSql::from_sql(ty, raw)?;
                         let bigdecimal = BigDecimal::from(numeric);
                         Ok(OwnedPgValue(Value::BigDecimal(bigdecimal)))
                     }
-                    types::JSON | types::JSONB => {
+                    Type::JSON | Type::JSONB => {
                         let value: serde_json::Value = FromSql::from_sql(ty, raw)?;
                         let text = serde_json::to_string(&value).unwrap();
                         Ok(OwnedPgValue(Value::Json(text)))
                     }
-                    types::INTERVAL => {
+                    Type::INTERVAL => {
                         let pg_interval: PgInterval = FromSql::from_sql(ty, raw)?;
                         let interval = Interval::new(
                             pg_interval.microseconds,
@@ -464,11 +464,11 @@ impl FromSql for OwnedPgValue {
                         );
                         Ok(OwnedPgValue(Value::Interval(interval)))
                     }
-                    types::POINT => {
+                    Type::POINT => {
                         let p: Point<f64> = FromSql::from_sql(ty, raw)?;
                         Ok(OwnedPgValue(Value::Point(p)))
                     }
-                    types::INET => {
+                    Type::INET => {
                         info!("inet raw:{:?}", raw);
                         match_type!(Text)
                     }

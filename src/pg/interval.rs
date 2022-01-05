@@ -6,7 +6,7 @@
 /// meaning of these parts.
 ///
 use byteorder::{BigEndian, ReadBytesExt};
-use postgres::types::{self, FromSql, Type};
+use postgres::types::{FromSql, Type};
 use std::error::Error;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -70,6 +70,6 @@ impl FromSql for PgInterval {
     }
 
     fn accepts(ty: &Type) -> bool {
-        matches!(*ty, types::INTERVAL)
+        matches!(*ty, Type::INTERVAL)
     }
 }

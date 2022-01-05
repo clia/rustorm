@@ -4,7 +4,7 @@
 use byteorder::{NetworkEndian, ReadBytesExt, WriteBytesExt};
 use std::error::Error;
 
-use postgres::types::{self, to_sql_checked, FromSql, IsNull, ToSql, Type};
+use postgres::types::{to_sql_checked, FromSql, IsNull, ToSql, Type};
 
 use bigdecimal::BigDecimal;
 use num_bigint::{BigInt, BigUint, Sign};
@@ -72,7 +72,7 @@ impl FromSql for PgNumeric {
 
     fn accepts(ty: &Type) -> bool {
         match *ty {
-            types::NUMERIC => true,
+            Type::NUMERIC => true,
             _ => panic!("can not accept type {:?}", ty),
         }
     }
@@ -118,7 +118,7 @@ impl ToSql for PgNumeric {
     }
 
     fn accepts(ty: &Type) -> bool {
-        matches!(*ty, types::NUMERIC)
+        matches!(*ty, Type::NUMERIC)
     }
 }
 
