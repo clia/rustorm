@@ -515,7 +515,7 @@ mod test {
 
     use crate::{pool::*, Pool, *};
     use log::*;
-    use std::ops::Deref;
+    use std::ops::DerefMut;
 
     #[test]
     fn test_character_array_data_type() {
@@ -561,9 +561,9 @@ mod test {
         let mut pool = Pool::new();
         let conn = pool.connect(db_url);
         assert!(conn.is_ok());
-        let conn: PooledConn = conn.unwrap();
+        let mut conn: PooledConn = conn.unwrap();
         match conn {
-            PooledConn::PooledPg(ref pooled_pg) => {
+            PooledConn::PooledPg(ref mut pooled_pg) => {
                 let rows = pooled_pg.query("select 42, 'life'", &[]).unwrap();
                 for row in rows.iter() {
                     let n: i32 = row.get(0);
@@ -582,10 +582,10 @@ mod test {
         let mut pool = Pool::new();
         let conn = pool.connect(db_url);
         assert!(conn.is_ok());
-        let conn: PooledConn = conn.unwrap();
+        let mut conn: PooledConn = conn.unwrap();
         match conn {
-            PooledConn::PooledPg(ref pooled_pg) => {
-                let c = pooled_pg.deref(); //explicit deref here
+            PooledConn::PooledPg(ref mut pooled_pg) => {
+                let c = pooled_pg.deref_mut(); //explicit deref here
                 let rows = c.query("select 42, 'life'", &[]).unwrap();
                 for row in rows.iter() {
                     let n: i32 = row.get(0);
