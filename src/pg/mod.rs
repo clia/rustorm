@@ -376,8 +376,8 @@ impl<'a> ToSql for PgValue<'a> {
     }
 }
 
-impl FromSql for OwnedPgValue {
-    fn from_sql(ty: &Type, raw: &[u8]) -> Result<Self, Box<dyn Error + Sync + Send>> {
+impl<'b> FromSql<'b> for OwnedPgValue {
+    fn from_sql(ty: &Type, raw: &'b [u8]) -> Result<Self, Box<dyn Error + Sync + Send>> {
         macro_rules! match_type {
             ($variant:ident) => {
                 FromSql::from_sql(ty, raw).map(|v| OwnedPgValue(Value::$variant(v)))
