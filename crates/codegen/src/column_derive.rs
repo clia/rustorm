@@ -1,37 +1,27 @@
 use crate::util::find_crate_name;
 use proc_macro2::TokenStream;
+use syn::{
+    Data,
+    DeriveInput,
+    Field,
+    Ident,
+};
 
-pub fn impl_to_column_names(ast: &syn::DeriveInput) -> TokenStream {
+pub fn impl_to_column_names(ast: &DeriveInput) -> TokenStream {
     let rustorm = find_crate_name();
     let name = &ast.ident;
     let generics = &ast.generics;
-    let fields: Vec<(&syn::Ident, &syn::Type)> = match ast.data {
-        syn::Data::Struct(ref data) => {
+
+    let from_fields = match ast.data {
+        Data::Struct(ref data) => {
             data.fields
                 .iter()
-                .map(|f| {
-                    let ident = f.ident.as_ref().unwrap();
-                    let ty = &f.ty;
-                    (ident, ty)
-                })
-                .collect::<Vec<_>>()
+                .map(|field| generate_from_field(&rustorm, name, field))
         }
-        syn::Data::Enum(_) | syn::Data::Union(_) => {
+        Data::Enum(_) | Data::Union(_) => {
             panic!("#[derive(ToColumnNames)] can only be used with structs")
         }
     };
-    let from_fields: Vec<TokenStream> = fields
-        .iter()
-        .map(|&(field, _ty)| {
-            quote! {
-                #rustorm::ColumnName {
-                    name: stringify!(#field).into(),
-                    table: Some(stringify!(#name).to_lowercase().into()),
-                    alias: None,
-                },
-            }
-        })
-        .collect();
 
     quote! {
         impl #generics #rustorm::dao::ToColumnNames for #name #generics {
@@ -41,5 +31,17 @@ pub fn impl_to_column_names(ast: &syn::DeriveInput) -> TokenStream {
                 ]
             }
         }
+    }
+}
+
+fn generate_from_field(rustorm: &TokenStream, table_name: &Ident, field: &Field) -> TokenStream {
+    let column_name = field.ident.as_ref().unwrap();
+
+    quote! {
+        #rustorm::ColumnName {
+            name: stringify!(#column_name).into(),
+            table: Some(stringify!(#table_name).to_lowercase().into()),
+            alias: None,
+        },
     }
 }
