@@ -7,11 +7,13 @@ use std::error::Error;
 
 use postgres::types::{to_sql_checked, FromSql, IsNull, ToSql, Type};
 
-use bigdecimal::BigDecimal;
-use num_bigint::{BigInt, BigUint, Sign};
+use bigdecimal::{
+    num_bigint::{BigInt, BigUint, Sign},
+    num_traits::{Signed, ToPrimitive, Zero},
+    BigDecimal,
+};
 
 use num_integer::Integer;
-use num_traits::{Signed, ToPrimitive, Zero};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PgNumeric {

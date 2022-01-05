@@ -35,7 +35,7 @@ pub fn test_connection(db_url: &str) -> Result<(), SqliteError> {
 pub struct SqliteDB(pub r2d2::PooledConnection<r2d2_sqlite::SqliteConnectionManager>);
 
 fn to_sq_value(val: &Value) -> rusqlite::types::Value {
-    use num_traits::ToPrimitive;
+    use bigdecimal::num_traits::ToPrimitive;
     match *val {
         Value::Text(ref v) => rusqlite::types::Value::Text(v.to_owned()),
         Value::Bool(v) => rusqlite::types::Value::Integer(if v { 1 } else { 0 }),

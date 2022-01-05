@@ -11,7 +11,7 @@ edition = "2018"
 
 [dependencies]
 base64 = "0.13"
-bigdecimal = { version = "0.0.14", features = ["serde"] }
+bigdecimal = { version = "0.3.0", features = ["serde"] }
 chrono = { version = "0.4.0", features = ["serde"] }
 geo-types = { version = "0.7.2", features = ["serde"] }
 serde = "1.0.15"

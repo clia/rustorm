@@ -1,8 +1,7 @@
 use crate::{column::Capacity, types::SqlType, Value};
-use bigdecimal::BigDecimal;
+use bigdecimal::{num_traits::ToPrimitive, BigDecimal};
 use chrono::NaiveDateTime;
 use log::*;
-use num_traits::ToPrimitive;
 use std::str::FromStr;
 
 pub fn extract_datatype_with_capacity(data_type: &str) -> (String, Option<Capacity>) {
