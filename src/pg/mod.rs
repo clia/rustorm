@@ -50,6 +50,7 @@ use std::{
     string::FromUtf8Error,
 };
 use thiserror::Error;
+use url::Url;
 
 mod column_info;
 #[allow(unused)]
@@ -60,8 +61,21 @@ mod table_info;
 pub fn init_pool(
     db_url: &str,
 ) -> Result<r2d2::Pool<r2d2_postgres::PostgresConnectionManager<NoTls>>, PostgresError> {
+    let url = Url::parse(db_url).expect("Invalid DB url");
     let mut config = postgres::Config::new();
-    config.host(db_url);
+
+    config
+        .host(url.host_str().expect("invalid DB URL"))
+        .user(url.username());
+
+    if let Some(password) = url.password() {
+        config.password(password);
+    }
+
+    if let Some(database) = url.path_segments().into_iter().flatten().next() {
+        config.dbname(database);
+    }
+
     test_connection(config.clone())?;
     let manager = r2d2_postgres::PostgresConnectionManager::new(config, NoTls);
     let pool = r2d2::Pool::new(manager)?;
