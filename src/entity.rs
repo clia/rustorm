@@ -10,6 +10,7 @@ use crate::{
     Database,
     DatabaseName,
     DbError,
+    Rows,
     TableDef,
     ToValue,
     Value,
@@ -324,6 +325,14 @@ impl EntityManager {
         let bvalues: Vec<&Value> = values.iter().collect();
         let rows = self.0.execute_sql_with_return(sql, &bvalues)?;
         Ok(rows.iter().map(|dao| R::from_dao(&dao)).collect::<Vec<R>>())
+    }
+
+    pub fn raw_execute_sql_with_return(
+        &mut self,
+        sql: &str,
+        params: &[&Value],
+    ) -> Result<Rows, DbError> {
+        self.0.execute_sql_with_return(sql, params)
     }
 
     pub fn execute_sql_with_one_return<'a, R>(
