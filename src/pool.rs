@@ -27,6 +27,7 @@ use crate::{
     DbError,
     EntityManager,
 };
+#[cfg(feature = "with-postgres")]
 use postgres::NoTls;
 use std::{
     collections::BTreeMap,
