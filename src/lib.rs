@@ -73,7 +73,7 @@ pub use codegen::{
     ToTableName,
 };
 
-pub use rustorm_dao::{
+pub use clia_rustorm_dao::{
     self,
     Array,
     ColumnName,
@@ -88,7 +88,7 @@ pub use rustorm_dao::{
 
 /// Wrap the rustorm_dao exports to avoid name conflict with the rustorm_codegen
 pub mod dao {
-    pub use rustorm_dao::{
+    pub use clia_rustorm_dao::{
         FromDao,
         ToColumnNames,
         ToDao,
@@ -98,7 +98,7 @@ pub mod dao {
 
 /// Wrap the rustorm_codegen exports to avoid name conflict with the rustorm_dao
 pub mod codegen {
-    pub use rustorm_codegen::{
+    pub use clia_rustorm_codegen::{
         FromDao,
         ToColumnNames,
         ToDao,

@@ -1,4 +1,4 @@
-use rustorm_dao::{
+use clia_rustorm_dao::{
     value::Array,
     Value,
 };

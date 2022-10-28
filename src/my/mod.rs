@@ -28,7 +28,7 @@ use r2d2_mysql::{
         prelude::Queryable,
     },
 };
-use rustorm_dao::{
+use clia_rustorm_dao::{
     FromDao,
     Rows,
 };

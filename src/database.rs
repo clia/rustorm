@@ -11,7 +11,7 @@ use crate::{
     TableName,
     Value,
 };
-use rustorm_codegen::FromDao;
+use clia_rustorm_codegen::FromDao;
 use serde::Serialize;
 
 /// The current database name and its comment

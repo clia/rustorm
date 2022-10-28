@@ -16,7 +16,7 @@ use crate::{
     Value,
 };
 
-use rustorm_dao::{
+use clia_rustorm_dao::{
     FromDao,
     TableName,
     ToColumnNames,
@@ -252,7 +252,7 @@ impl EntityManager {
     }
 
     /// build the returning clause
-    fn build_returning_clause(&self, return_columns: Vec<rustorm_dao::ColumnName>) -> String {
+    fn build_returning_clause(&self, return_columns: Vec<clia_rustorm_dao::ColumnName>) -> String {
         format!(
             "\nRETURNING \n{}",
             return_columns

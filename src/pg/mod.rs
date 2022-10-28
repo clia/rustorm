@@ -39,7 +39,7 @@ use r2d2::{
     self,
     ManageConnection,
 };
-use rustorm_dao::{
+use clia_rustorm_dao::{
     value::Array,
     Interval,
     Rows,

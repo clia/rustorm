@@ -20,7 +20,7 @@ use crate::{
     Value,
 };
 use log::*;
-use rustorm_dao::value::ToValue;
+use clia_rustorm_dao::value::ToValue;
 
 pub fn get_tablenames(db: &mut dyn Database) -> Result<Vec<TableName>, DbError> {
     #[derive(Debug, FromDao)]
