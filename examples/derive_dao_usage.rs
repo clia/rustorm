@@ -1,4 +1,4 @@
-use rustorm::{
+use clia_rustorm::{
     dao,
     Dao,
     FromDao,
@@ -17,7 +17,7 @@ fn main() {
     // imported here since we are using the trait methods
     // `to_dao` and `to_table_name` without
     // conflicting with the derive ToDao and ToTableName macro
-    use rustorm::dao::{
+    use clia_rustorm::dao::{
         ToDao,
         ToTableName,
     };

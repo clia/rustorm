@@ -30,7 +30,7 @@ use syn::{
 /// workaround there was to import the necessary types, so that `crate::dao` refers to
 /// `rustorm::dao`, for example.
 pub fn find_crate_name() -> TokenStream {
-    find_crate(|name| name == "rustorm")
+    find_crate(|name| name == "clia_rustorm")
         .map(|package| Ident::new(&package.name, Span::call_site()).into_token_stream())
         .unwrap_or_else(|error| {
             if !matches!(error, find_crate::Error::NotFound) {
@@ -42,7 +42,7 @@ pub fn find_crate_name() -> TokenStream {
                 .crate_package()
                 .expect("failed to read the name of this crate");
 
-            if this_crate.name == "rustorm" {
+            if this_crate.name == "clia_rustorm" {
                 Token![crate](Span::call_site()).into_token_stream()
             } else {
                 panic!("`rustorm` dependency not found");

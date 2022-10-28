@@ -1,11 +1,11 @@
 [package]
-name = "rustorm"
-version = "0.19.0"
-authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
+name = "clia-rustorm"
+version = "0.19.1"
+authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>", "jvff", "clia" ]
 license = "MIT"
 description = "A complete rewrite of rustorm"
-repository = "https://github.com/ivanceras/rustorm"
-documentation = "https://docs.rs/rustorm"
+repository = "https://github.com/clia/rustorm"
+documentation = "https://docs.rs/clia-rustorm"
 readme = "README.md"
 keywords = ["orm", "postgresql", "sqlite"]
 edition = "2018"
@@ -49,8 +49,8 @@ features = [
     "with-uuid-0_8",
 ]
 
-[badges]
-travis-ci = { repository = "ivanceras/rustorm" }
+# [badges]
+# travis-ci = { repository = "ivanceras/rustorm" }
 
 [features]
 db-auth = [] # Use the database as authentication server for the user

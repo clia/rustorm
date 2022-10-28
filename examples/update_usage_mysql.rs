@@ -1,4 +1,4 @@
-use rustorm::{
+use clia_rustorm::{
     DbError,
     Pool,
     Rows,
